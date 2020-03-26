@@ -1,4 +1,3 @@
-Oi oi oi
 <?php
 	global $base_url;
 	$lib = $base_url."/".libraries_get_path('calendarUtil');
