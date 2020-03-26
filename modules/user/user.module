@@ -363,6 +363,7 @@ class UserController extends DrupalDefaultEntityController {
  * @see user_load_multiple()
  */
 function user_load($uid, $reset = FALSE) {
+  db_set_active('samo_cliente');
   $users = user_load_multiple(array($uid), array(), $reset);
   return reset($users);
 }
