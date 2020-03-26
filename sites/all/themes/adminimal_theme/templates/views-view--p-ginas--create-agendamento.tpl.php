@@ -6,7 +6,7 @@ error_reporting(E_ALL | E_STRICT);
 
 if(isset($_GET['dev'])){
 
-  $n = node_load(68);
+  $n = node_load($_GET['dev']);
   echo "<pre>";
   print_r($n);
 
