@@ -1,0 +1,173 @@
+<?php
+
+/**
+ * @file
+ * Install/update/uninstall scripts for node_field module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function node_field_schema() {
+  $schema = [];
+
+  $schema['node_field'] = [
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'nid' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'type' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => 'text',
+      ],
+      'title' => [
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => TRUE,
+        'default' => 'unassigned',
+      ],
+      'machine_name' => [
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'show_title' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'size' => 'tiny',
+        'default' => 0,
+      ],
+      'hidden' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'size' => 'tiny',
+        'default' => 0,
+      ],
+      'value' => [
+        'type' => 'text',
+        'size' => 'big',
+        'not null' => FALSE,
+      ],
+      'weight' => [
+        'type' => 'int',
+        'unsigned' => FALSE,
+        'not null' => TRUE,
+        'size' => 'small',
+        'default' => 0,
+      ],
+      'settings' => [
+        'type' => 'text',
+        'size' => 'big',
+        'not null' => FALSE,
+        'serialize' => TRUE,
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'target' => ['nid'],
+    ],
+  ];
+
+  return $schema;
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function node_field_uninstall() {
+  variable_del('node_field_gmap_api_key');
+}
+
+/**
+ * Change definition of type field.
+ */
+function node_field_update_7005() {
+  $field = [
+    'type' => 'varchar',
+    'length' => 64,
+    'not null' => TRUE,
+    'default' => 'text',
+  ];
+  db_change_field('node_field', 'type', 'type', $field);
+}
+
+/**
+ * Add machine_name field.
+ */
+function node_field_update_7004() {
+  if (!db_field_exists('node_field', 'machine_name')) {
+    $field = [
+      'type' => 'varchar',
+      'length' => 256,
+      'not null' => TRUE,
+      'default' => '',
+    ];
+    db_add_field('node_field', 'machine_name', $field);
+  }
+}
+
+/**
+ * Add 'hidden' field.
+ */
+function node_field_update_7003() {
+  if (!db_field_exists('node_field', 'hidden')) {
+    $field = [
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+      'size' => 'tiny',
+      'default' => 0,
+    ];
+    db_add_field('node_field', 'hidden', $field);
+  }
+}
+
+/**
+ * Change definition of options field.
+ */
+function node_field_update_7002() {
+  $field = [
+    'type' => 'text',
+    'size' => 'big',
+    'not null' => FALSE,
+    'serialize' => TRUE,
+  ];
+  db_change_field('node_field', 'options', 'settings', $field);
+}
+
+/**
+ * Change definition of type field.
+ */
+function node_field_update_7001() {
+  $field = [
+    'type' => 'varchar',
+    'length' => 32,
+    'not null' => TRUE,
+    'default' => 'text',
+  ];
+  db_change_field('node_field', 'type', 'type', $field);
+}
+
+/**
+ * Change definition of value field.
+ */
+function node_field_update_7000() {
+  $field = [
+    'type' => 'text',
+    'size' => 'big',
+    'not null' => FALSE,
+  ];
+  db_change_field('node_field', 'value', 'value', $field);
+}

@@ -1,0 +1,649 @@
+<?php
+
+
+function eventos_menu() {
+  $items = array();
+
+  $items['admin/create/paciente'] = array( 
+    'title' => 'Identifique o Paciente',
+    'page callback' => 'drupal_get_form', 
+    'page arguments' => array('paciente_form'),
+    'access arguments' => array('access content')
+  );
+
+  $items['calendar/getEventos'] = array(
+    'delivery callback' => 'getEventos',
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('access content')
+  );
+
+  $items['calendar/getEventosByProfissional'] = array(
+    'delivery callback' => 'getEventosByProfissional',
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('access content')
+  );
+
+  $items['calendar/alterEvento'] = array(
+    'delivery callback' => 'alterEvento',
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('access content')
+  );
+  
+  $items['getProcedimentos'] = array(
+    'delivery callback' => 'getProcedimentos',
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('access content')
+  );
+
+  $items['getDadosProcedimentos'] = array(
+    'delivery callback' => 'getDadosProcedimentos',
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('access content')
+  );
+
+  $items['manipulaAgendamento'] = array(
+    'delivery callback' => 'manipulaAgendamento',
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('access content')
+  );
+
+  $items['getPagamentos'] = array(
+    'delivery callback' => 'getPagamentos',
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('access content')
+  );
+
+  $items['salvarProntuario'] = array(
+    'delivery callback' => 'salvarProntuario',
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('access content')
+  );
+
+  $items['getSaldoPaciente'] = array(
+    'delivery callback' => 'getSaldoPaciente',
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('access content')
+  );
+
+  return $items;
+  
+}
+
+function salvarProntuario(){
+  
+  global $user;
+  global $base_url;
+
+  $agendamento = node_load($_POST['agendamento']);
+
+  $prontuario                     = new stdClass();
+  $prontuario->title              = "Prontuário ".time();
+  $prontuario->uid                = $user->uid;
+  $prontuario->language           = 'pt-br';
+  $prontuario->status             = 1;
+  $prontuario->type               = 'prontuario';
+  $prontuario->body
+  ['und'][0]['value']             = $_POST['body'];
+  $prontuario->field_agendamento
+  ['und'][0]['target_id']         = $agendamento->nid;
+  $prontuario->field_paciente
+  ['und'][0]['target_id']         = $_POST['paciente'];
+
+  $n = node_submit($prontuario);
+  $salvo = node_save($n);
+
+  // Status de atendido
+  $agendamento->field_status['und'][0]['value'] = 4;
+  $n = node_submit($agendamento);
+  $salvo = node_save($n);
+
+  header('Location: '.$base_url."/#overlay=admin/create/agendamento/".$agendamento->nid."/".$_POST['paciente']."/".$agendamento->field_profissional['und'][0]['target_id']);
+  
+}
+
+function manipulaAgendamento(){
+  
+  // $a = node_load(63);
+  // echo "<pre>";
+  // print_r($a);
+  // die();
+
+  $agendamento = node_load($_POST['ID']);
+  // Dados iniciais caso não exista agendamento passado como parametro
+  if(!$agendamento){
+    $agendamento->type = 'agendamento';
+    $agendamento->language = 'pt-br';
+    $agendamento->status = 1;
+    $agendamento->comment = 0;
+    $agendamento->promote = 0;
+    $agendamento->sticky = 0;
+    global $user;
+    $agendamento->uid = $user->uid;
+    $agendamento->title = 'Agendamento '.time();
+  }
+  
+  // Independentemente de alteração, esses dados sempre serão alterados no node
+  $agendamento->body['und'][0]['value'] = 'OBS';
+  $agendamento->field_profissional['und'][0]['target_id'] = $_POST['PROFISSIONAL'];
+  $agendamento->field_paciente['und'][0]['target_id'] = $_POST['PACIENTE'];
+  $agendamento->field_status['und'][0]['value'] = $_POST['STATUS'];
+  foreach($_POST['TIPO_DE_AGENDAMENTO'] as $k=>$v){
+    $agendamento->field_tipo_de_agendamento['und'][$k]['value'] = $v;
+  }
+
+  $dt = explode('/',$_POST['DATA']);
+  $dataAgendamento = $dt[2]."-".$dt[1]."-".$dt[0]." ".$_POST['HORA'].":00";
+  $agendamento->field_data['und'][0]['value'] = $dataAgendamento;
+  $agendamento->field_data['und'][0]['value2'] = date("Y-m-d H:i:s",strtotime('+30 minutes',strtotime($dataAgendamento)));
+
+  // Salva o novo agendamento caso ele não exista
+  if(!$agendamento->nid){
+    $n = node_submit($agendamento);
+    $salvo = node_save($n);
+    
+    $result = db_select("node","n")
+    ->fields('n')
+    ->condition('title',$agendamento->title)
+    ->execute()
+    ->fetchAssoc();
+    $agendamento = node_load($result['nid']);
+  }
+
+  //Preenche esses dados e os atualiza sempre que executar este processo
+  $rowIndex = ($_POST['PROCEDIMENTO']['index'])?intval($_POST['PROCEDIMENTO']['index']):intval($_POST['PAGAMENTO']['index']);
+
+  if($_POST['PROCEDIMENTO']['action'] == 'delPro'){
+    
+    unset($agendamento->field_procedimentos['und'][$rowIndex]);
+    unset($agendamento->field_obs_do_procedimento['und'][$rowIndex]);
+    unset($agendamento->field_quantidade_do_procedimento['und'][$rowIndex]);
+    unset($agendamento->field_executou['und'][$rowIndex]);
+    unset($agendamento->field_valor['und'][$rowIndex]);
+
+  } elseif($_POST['PROCEDIMENTO']['action'] == 'updPro' || $_POST['PROCEDIMENTO']['action'] == 'addPro') {
+
+    $agendamento->field_procedimentos['und'][$rowIndex]['target_id']          = $_POST['PROCEDIMENTO']['id'];
+    $agendamento->field_obs_do_procedimento['und'][$rowIndex]['value']        = $_POST['PROCEDIMENTO']['Detalhes'];
+    $agendamento->field_quantidade_do_procedimento['und'][$rowIndex]['value'] = $_POST['PROCEDIMENTO']['QTD'];
+    $agendamento->field_executou['und'][$rowIndex]['value']                   = ($_POST['PROCEDIMENTO']['Executou'] == 'false')? 0:1;
+    $agendamento->field_valor['und'][$rowIndex]['value']                      = $_POST['PROCEDIMENTO']['Valor'];
+
+  } elseif($_POST['PAGAMENTO']['action'] == 'delPag'){
+    
+    unset($agendamento->field_valor_pago['und'][$rowIndex]);
+    unset($agendamento->field_forma['und'][$rowIndex]);
+    unset($agendamento->field_parcelas['und'][$rowIndex]);
+    unset($agendamento->field_data_do_pagamento['und'][$rowIndex]);
+
+  } elseif($_POST['PAGAMENTO']['action'] == 'updPag' || $_POST['PAGAMENTO']['action'] == 'addPag'){
+    
+    $agendamento->field_valor_pago['und'][$rowIndex]['value']         = $_POST['PAGAMENTO']['ValorPgto'];
+    $agendamento->field_forma['und'][$rowIndex]['value']              = $_POST['PAGAMENTO']['FormaPgto'];
+    $agendamento->field_parcelas['und'][$rowIndex]['value']           = $_POST['PAGAMENTO']['Parcelas'];
+    
+    $dataPgto = str_replace('T',' ',$_POST['PAGAMENTO']['DataPgto']);
+    $dataPgto = substr($dataPgto, 0, -5);
+    $agendamento->field_data_do_pagamento['und'][$rowIndex]['value']  = $dataPgto;
+
+  }
+  // print_r($agendamento); die();
+  // Atualiza todo o agendamento
+  $n = node_submit($agendamento);
+  $salvo = node_save($n);
+  echo $agendamento->nid;
+  
+}
+
+function paciente_form($form, &$form_state) {
+  $aredirect = explode('/',$_GET['q']);
+  $profissional = $aredirect[count($aredirect)-1];
+  $redirect = $aredirect[count($aredirect)-2].'/'.$profissional;
+  
+  $form['nome'] = array(
+    '#type' => 'textfield', 
+    '#autocomplete_path' => 'entityreference/autocomplete/single/field_paciente/node/agendamento/NULL',
+    '#title' => 'Nome do paciente',
+    '#id' => 'autocompleteNomePaciente',
+    '#size' => 60,
+    '#maxlength' => 255,
+    '#required' => false,
+  );
+  $form['telefone'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Telefone',
+    '#size' => 20,
+    '#maxlength' => 17,
+    '#required' => false, 
+  );
+  $form['redirect'] = array(
+    '#type' => 'hidden', 
+    '#size' => 60,
+    '#maxlength' => 255,
+    '#id' => 'redirect',
+    '#value' => $redirect,
+    '#required' => false,
+  );
+  $form['uid'] = array(
+    '#type' => 'hidden', 
+    '#size' => 60,
+    '#maxlength' => 255,
+    '#id' => 'uid',
+    '#required' => false,
+  );
+  $form['submit_button'] = array(
+    '#type' => 'submit',
+    '#value' => 'Salvar e continuar...',
+  );
+  $form['#attached']['js'] = array(
+    drupal_get_path('module', 'eventos') . '/includes/js/forms.js',
+  );
+
+  drupal_add_js(path_to_theme().'/js/utils.js');
+  return $form;
+}
+
+function retiraAcentos($string){
+  $acentos  =  'ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûýýþÿŔŕ';
+  $sem_acentos  =  'aaaaaaaceeeeiiiidnoooooouuuuybsaaaaaaaceeeeiiiidnoooooouuuyybyRr';
+  $string = strtr($string, utf8_decode($acentos), $sem_acentos);
+  $string = str_replace(" ","-",$string);
+  return utf8_decode($string);
+}
+
+function paciente_form_validate($form, &$form_state) {
+    
+  if($form['uid']['#value'] == ' '|| $form['uid']['#value'] == ''){
+    $erroNome = preg_match('|^[\pL\s]+$|u',$form['nome']['#value']);
+    if(!$erroNome){
+      form_set_error('nome', "Nome do paciente inválido ".$erroNome);
+    }
+    
+  }
+
+  $erro = db_select("users","u")
+    ->fields('u')
+    ->condition('name',$form['nome']['#value'])
+    ->execute()
+    ->fetchAssoc();
+  
+  if($erro){
+    form_set_error('nome', t('Tivemos um problema ao cadastrar esse paciente, troque o nome e tente novamente'));
+  }
+
+}
+
+function paciente_form_submit($form, &$form_state) {
+
+  $n = array();
+  $n = explode(' - ',$form['nome']['#value']);
+  $nomeCompleto = (count($n) > 0)?$n[0]:$form['nome']['#value'];
+  $nomeCompletoSemAcento = retiraAcentos($nomeCompleto);
+
+  $name = trim($nomeCompletoSemAcento, " \t\n\r");
+  $email = ($nomeCompleto == '')?null:$name.rand()."@nesaude.com";
+
+  $telefone = array(
+    'und' => array(
+      0 => array(
+        'value' => $form['telefone']['#value'],
+        'format' => '',
+        'safe_value' => $form['telefone']['#value']
+      )
+    )
+  );
+
+  $new_user = array(
+    'name' => $email,
+    'pass' => '$S$DdZ32sNE2leF3STLsNGgr5ywhHRQQ7MblpezVAc2VFK7valrkr5R', // senha
+    'mail' => $email,
+    'status' => 1,
+    'init' => $email,
+    'roles' => array(
+      DRUPAL_AUTHENTICATED_RID => 'authenticated user',
+      5 => 'Paciente'
+    ),
+    'field_nome_completo' => array(
+      'und' => array(
+        0 => array(
+          'value' => $nomeCompleto,
+          'format' => '',
+          'safe_value' => $nomeCompletoSemAcento
+        )
+      )
+    ),
+    'field_telefone' => $telefone
+  );
+  
+  $uid = $form['uid']['#value'];
+
+  if($uid == ' ' || $uid == ''){
+ 
+    $account = user_save('',$new_user);
+    $usr = user_load_by_mail($email);
+    $uid = $usr->uid;
+    
+  } else {
+
+    $usr = user_load($uid);
+    $edit = array('field_telefone' => $telefone);
+    $account = user_save($usr,$edit);
+
+  }
+  
+  if (!$account) {
+
+    drupal_set_message(t("Erro ao salvar o Paciente."), 'error');
+    $form_state['redirect'] = '';
+    return;
+
+  } else {
+    
+    $uid = $usr->uid;
+    $profissional = explode('/',$form['redirect']['#value']);
+    $url = '/admin/create/agendamento/'.$uid.'/'.$profissional[1];
+
+    $form_state['redirect'] = url($url, array('absolute' => true));
+    
+  }
+
+}
+
+function getEventos(){
+
+  $dtInicial = str_replace("T"," ",$_GET['start']);
+  $dtFinal = str_replace("T"," ",$_GET['end']);
+
+  $sql = "
+  SELECT nid FROM node as n
+
+  INNER JOIN field_data_field_data as d
+  ON n.nid = d.entity_id
+  
+  WHERE 
+    type = 'agendamento'
+  AND
+    d.field_data_value > '$dtInicial'
+  AND 
+    d.field_data_value2 < '$dtFinal'
+  "; 
+  
+  $event = Array();
+  $event = processaEventos($sql,'ALL');
+
+  $retorno = json_encode($event);
+  print($retorno);
+  
+
+}
+
+function getEventosByProfissional(){
+  $dtInicial = str_replace("T"," ",$_GET['start']);
+  $dtFinal = str_replace("T"," ",$_GET['end']);
+  $uid = $_GET['uid'];
+
+  $sql = "
+  SELECT nid FROM node as n
+
+  INNER JOIN field_data_field_data as d
+  ON n.nid = d.entity_id
+  
+  INNER JOIN field_data_field_profissional as p
+  ON n.nid = p.entity_id
+  
+  WHERE 
+    type = 'agendamento'
+  AND
+    d.field_data_value > '$dtInicial'
+  AND 
+    d.field_data_value2 < '$dtFinal'
+  AND
+    p.field_profissional_target_id = $uid
+  "; 
+  
+  $event = Array();
+  $event = processaEventos($sql,'individual');
+
+  $retorno = json_encode($event);
+
+  print_r($retorno);
+}
+
+function processaEventos($sql,$tipo){
+
+  $event = Array();
+  $procedimentos = Array();
+  $classNames = Array();
+  array_push($classNames,'evento');
+  $result = db_query($sql);
+  foreach($result as $row){
+    
+    
+    $agendamento = node_load($row->nid);
+    
+    $paciente = user_load($agendamento->field_paciente['und'][0]['target_id']);
+    $title = $paciente->field_nome_completo['und'][0]['safe_value'];
+    
+    $profissional = user_load($agendamento->field_profissional['und'][0]['target_id']);
+    
+      switch ($agendamento->field_status['und'][0]['value']) {
+        case 0:
+          $classNames = "Agendado";
+          $borderColor = "#CCCCCC";
+          break;
+        case 1:
+          $classNames = "Confirmado";
+          $borderColor = "#00FF00";
+        break;
+        case 2:
+          $classNames = "Emespera";
+          $borderColor = "#FF8C00";
+        break;
+        case 3:
+          $classNames = "Ematendimento";
+          $borderColor = "#8B008B";
+        break;
+        case 4:
+          $classNames = "Atendido";
+          $borderColor = "#6495ED";
+        break;
+        case 5:
+          $classNames = "Cancelado";
+          $borderColor = "#FF0000";
+          break;                        
+        default:
+          $classNames = "evento";
+          $borderColor = $profissional->field_cor['und'][0]['rgb'];
+          break;
+      }
+      $cor = $profissional->field_cor['und'][0]['rgb'];
+    
+    if(count($agendamento->field_procedimentos) > 0){
+      foreach($agendamento->field_procedimentos['und'] as $procedimento){
+
+        $objProc = new stdClass();
+        $objProc->procedimento = $procedimento['target_id'];
+        array_push($procedimentos,$objProc);
+  
+      }
+    }
+    
+    
+    $start = str_replace(" ","T",$agendamento->field_data['und'][0]['value']);
+    $end = str_replace(" ","T",$agendamento->field_data['und'][0]['value2']);
+
+    $objEvt                 = new stdClass();
+    $objEvt->id             = $agendamento->nid;
+    $objEvt->title          = $title;
+    $objEvt->start          = $start;
+    $objEvt->end            = $end;
+    $objEvt->color          = $cor;
+    $objEvt->borderColor    = $borderColor;
+    $objEvt->classNames     = $classNames;
+    $objEvt->url            = "#overlay=admin/create/agendamento/$row->nid/".$agendamento->field_paciente['und'][0]['target_id']."/$profissional->uid";
+    
+    array_push($event,$objEvt);
+    
+  }
+
+  return $event;
+
+}
+
+function alterEvento(){
+  $agendamento = node_load($_POST['id']);
+  
+  $agendamento->field_data['und'][0]['value'] = $_POST['start'];
+  $agendamento->field_data['und'][0]['value2'] = $_POST['end'];
+
+  $n = node_submit($agendamento);
+  $ret = node_save($n);
+  print_r($ret);
+
+}
+
+function getProcedimentos(){
+  
+  $nid = '';
+  $ret = Array();
+  $objProcedimento[] = new stdClass();
+  $valorTotal = 0;
+
+  if(!isset($_GET['nid'])){
+    return '[]';
+  } else {
+    $nid = $_GET['nid'];
+  }
+
+  $agendamento = node_load($nid);
+  foreach($agendamento->field_procedimentos['und'] as $k=>$v){
+
+    $proc = node_load($v['target_id']);
+
+    $objProcedimento[$k]->id            = $v['target_id'];
+    $objProcedimento[$k]->Procedimento  = $proc->title;
+    $objProcedimento[$k]->QTD           = $agendamento->field_quantidade_do_procedimento['und'][$k]['value'];
+    $objProcedimento[$k]->Valor         = floatval($agendamento->field_valor['und'][$k]['value']);
+    $objProcedimento[$k]->Detalhes      = $agendamento->field_obs_do_procedimento['und'][$k]['value'];
+    $objProcedimento[$k]->Executou      = boolval($agendamento->field_executou['und'][$k]['value']);
+    
+    $valorTotal += $objProcedimento[$k]->Valor;
+    $objProcedimento[$k]->Total         = $valorTotal;
+    
+    array_push($ret,$objProcedimento[$k]);
+  }
+  
+  print(json_encode($ret));
+
+}
+
+function getDadosProcedimentos(){
+
+  $procedimento = node_load($_GET['nid']);
+
+  print(json_encode($procedimento));
+
+}
+
+function getPagamentos(){
+
+  $nid = '';
+  $ret = Array();
+  $objPagamento[] = new stdClass();
+  $valorTotal = 0;
+
+  if(!isset($_GET['nid'])){
+    return '[]';
+  } else {
+    $nid = $_GET['nid'];
+  }
+
+  $agendamento = node_load($nid);
+  foreach($agendamento->field_forma['und'] as $k=>$v){
+    unset($agendamento->field_valor_pago['und'][$rowIndex]);
+    unset($agendamento->field_forma['und'][$rowIndex]);
+    unset($agendamento->field_parcelas['und'][$rowIndex]);
+    unset($agendamento->field_data_do_pagamento['und'][$rowIndex]);
+
+    // $objPagamento[$k]->id         = $k;
+    $objPagamento[$k]->valorPgto  = floatval($agendamento->field_valor_pago['und'][$k]['value']);
+    $objPagamento[$k]->formaPgto  = intval($agendamento->field_forma['und'][$k]['value']);
+    $objPagamento[$k]->parcelas   = $agendamento->field_parcelas['und'][$k]['value'];
+
+    $dt = explode(" ",$agendamento->field_data_do_pagamento['und'][$k]['value']);
+    $dt = explode('-',$dt[0]);
+    $objPagamento[$k]->dataPgto   = $dt[2].'/'.$dt[1].'/'.$dt[0];
+    
+    $valorTotal += $objPagamento[$k]->valorPgto;
+    $objPagamento[$k]->Total         = $valorTotal;
+    
+    array_push($ret,$objPagamento[$k]);
+  }
+  
+  print(json_encode($ret));
+
+}
+function getCalculo($agendamentoId,$retorno,$tipo){
+  
+  $agendamento = node_load($agendamentoId);
+
+  if($tipo == 'pago'){
+    if(isset($agendamento->field_valor_pago['und'])){
+      foreach($agendamento->field_valor_pago['und'] as $k=>$v){
+        $retorno += floatval($v['value']);
+      }
+    }
+  } elseif($tipo == 'executado'){
+    if(isset($agendamento->field_procedimentos['und'])){
+      foreach($agendamento->field_procedimentos['und'] as $k=>$v){
+        if($agendamento->field_executou['und'][$k]['value']){
+          $retorno += floatval($agendamento->field_valor['und'][$k]['value']);
+        }
+      }
+    }  
+  }
+
+  return $retorno;
+}
+function getSaldoPaciente(){
+  
+  $totalExecutado  = 0.00;
+  $totalPago  = 0.00;
+  $ret = Array();
+  $objSaldo = new stdClass();
+
+  if(isset($_GET['pid'])){
+    $pid = $_GET['pid'];
+  } else {
+    die(0.00);
+  }
+
+  $sql = "
+  SELECT nid FROM node as n
+
+  INNER JOIN field_data_field_paciente as pid
+  ON n.nid = pid.entity_id
+
+  WHERE pid.field_paciente_target_id = $pid
+  "; 
+  
+  $event = Array();
+  $result = db_query($sql);
+  foreach($result as $row){
+    
+    if(isset($_GET['nid']) && $row->nid == $_GET['nid']){
+      $totalPago      = getCalculo($row->nid,$totalPago,'pago');
+      $totalExecutado = getCalculo($row->nid,$totalExecutado,'executado');
+    } elseif(!isset($_GET['nid'])) {
+      $totalPago      = getCalculo($row->nid,$totalPago,'pago');
+      $totalExecutado = getCalculo($row->nid,$totalExecutado,'executado');
+    }
+  }
+
+  $objSaldo->totalPago      = $totalPago;
+  $objSaldo->totalExecutado = $totalExecutado;
+
+  array_push($ret,$objSaldo);
+
+  print(json_encode($ret));
+  
+}

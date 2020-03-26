@@ -1,0 +1,10 @@
+name = Node Field File
+description = Provides file field for Node Field.
+core = 7.x
+package = Node Field
+
+; Information added by Drupal.org packaging script on 2019-12-28
+version = "7.x-2.47"
+core = "7.x"
+project = "node_field"
+datestamp = "1577508787"

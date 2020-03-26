@@ -1,0 +1,168 @@
+<?php
+
+/**
+ * @file
+ * Main file of node_field module.
+ */
+
+require_once 'includes/node_field_file.field.inc';
+require_once 'model/node_field_file.db.inc';
+
+define('NODE_FIELD_FILE_DEFAULT_WIDTH', 400);
+define('NODE_FIELD_FILE_DEFAULT_HEIGHT', 300);
+
+/**
+ * Implements hook_node_field_info_alter().
+ */
+function node_field_file_node_field_info_alter(&$items) {
+  $items['file'] = array(
+    'type' => 'file',
+    'label' => t('File'),
+    'widget' => 'node_field_file_widget',
+    'formatter' => 'node_field_file_formatter',
+    'settings' => 'node_field_file_settings',
+  );
+}
+
+/**
+ * Implements hook_node_field_update().
+ */
+function node_field_file_node_field_update($field) {
+  if (isset($field['value']) && isset($field['type']) && $field['type'] == 'file') {
+    if (empty($field['value'])) {
+      $node_field = node_field_load($field['id']);
+      if ($node_field['value']) {
+        $file = file_load($node_field['value']);
+        if ($file) {
+          file_usage_delete($file, 'node_field_file', 'node_field', $field['id']);
+          file_delete($file);
+        }
+      }
+    }
+    else {
+      $file_system = empty($field['settings']['file_system']) ? 'public' : $field['settings']['file_system'];
+      $file = file_load($field['value']);
+      if ($file) {
+        $file->status = FILE_STATUS_PERMANENT;
+        $destination = $file_system . '://' . $file->filename;
+        $destination = file_unmanaged_move($file->uri, $destination, FILE_EXISTS_RENAME);
+        $file->uri = $destination;
+        file_save($file);
+        file_usage_add($file, 'node_field_file', 'node_field', $field['id']);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_node_field_delete().
+ */
+function node_field_file_node_field_delete($field) {
+  if (!empty($field['value']) && isset($field['type']) && $field['type'] == 'file') {
+    $file = file_load($field['value']);
+    file_usage_delete($file, 'node_field_file', 'node_field', $field['id']);
+    file_delete($file);
+  }
+}
+
+/**
+ * Implements hook_file_insert().
+ */
+function node_field_file_file_insert($file) {
+  if (isset($file->source)) {
+    $source = $file->source;
+    if (strpos($source, 'node_fields_') !== FALSE) {
+      $file_id = str_replace('node_fields_', '', $source);
+      if (is_numeric($file_id)) {
+        node_field_file_db_on_insert($file->fid, $file_id);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function node_field_file_form_alter($form, $form_state, $form_id) {
+  if ($form_id == 'node_field_group_node_view_form' && isset($form_state['values'])) {
+    $keys = array_keys($form_state['values']);
+    foreach ($keys as $key) {
+      if (preg_match('|^node_fields_(\d*)_remove_button$|im', $key, $matches)) {
+        $field = node_field_load_node_field($matches[1]);
+        $field['value'] = '';
+        node_field_update_node_field($field);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_file_download().
+ */
+function node_field_file_file_download($uri, $field_type = 'file') {
+  // Get the file record based on the URI. If not in the database just return.
+  $files = file_load_multiple(array(), array('uri' => $uri));
+  if (count($files)) {
+    foreach ($files as $item) {
+      // Since some database servers sometimes use a case-insensitive comparison
+      // by default, double check that the filename is an exact match.
+      if ($item->uri === $uri) {
+        $file = $item;
+        break;
+      }
+    }
+  }
+  if (!isset($file)) {
+    return;
+  }
+
+  // Find out which (if any) fields of this type contain the file.
+  $references = file_usage_list($file);
+
+  // Stop processing if there are no references in order to avoid returning
+  // headers for files controlled by other modules.
+  if (empty($references)) {
+    return;
+  }
+
+  // Default to allow access.
+  $denied = FALSE;
+  // Loop through all references of this file. If a reference explicitly allows
+  // access to the field to which this file belongs, no further checks are done
+  // and download access is granted. If a reference denies access, eventually
+  // existing additional references are checked. If all references were checked
+  // and no reference denied access, access is granted as well. If at least one
+  // reference denied access, access is denied.
+  foreach ($references as $reference_name => $reference) {
+    foreach ($reference as $name => $entity_reference) {
+      if ($name == 'node_field' || $reference_name == 'node_field') {
+        foreach ($entity_reference as $id => $item) {
+          if ($name == 'node_field') {
+            $node_field = node_field_load($id);
+            if ($node_field) {
+              $entity = node_load($node_field['nid']);
+            }
+          }
+          else {
+            $entity = node_load($id);
+          }
+          // Check if access to that node is not disallowed.
+          // If this check fails,
+          // stop checking access for this reference.
+          if (!node_access('view', $entity)) {
+            $denied = TRUE;
+            break;
+          }
+        }
+      }
+    }
+  }
+  // Access specifically denied.
+  if ($denied) {
+    return -1;
+  }
+
+  // Access is granted.
+  $headers = file_get_content_headers($file);
+  return $headers;
+}

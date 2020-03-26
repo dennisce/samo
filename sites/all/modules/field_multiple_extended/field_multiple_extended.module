@@ -1,0 +1,915 @@
+<?php
+/**
+ * @file
+ * Provides customizations to the field_multiple_value_form.
+ */
+
+/**
+ * Implements hook_hook_info().
+ */
+function field_multiple_extended_hook_info() {
+  $base_info = array('group' => 'field_multiple_extended');
+  return array(
+    'field_multiple_extended_field_instance_settings_alter' => $base_info,
+    'field_multiple_extended_field_instance_is_supported_alter' => $base_info,
+  );
+}
+
+/**
+ * Returns default field instance settings for field_multiple_extended.
+ *
+ * @return array
+ *   An array of instance settings.
+ */
+function field_multiple_extended_field_instance_default_settings() {
+  // Disabled by default.
+  return array(
+    'enabled' => FALSE,
+    'exclude_extra_item' => TRUE,
+    'min_required' => NULL,
+    'max_allowed' => NULL,
+  );
+}
+
+/**
+ * Returns default field instance settings for imported fields.
+ *
+ * @return array
+ *   An array of settings.
+ */
+function field_multiple_extended_patternbuilder_importer_default_settings() {
+  // Enabled by default for imported fields.
+  return array(
+    'enabled' => TRUE,
+    'exclude_extra_item' => TRUE,
+    'min_required' => NULL,
+    'max_allowed' => NULL,
+  );
+}
+
+/**
+ * Returns field instance settings for field_multiple_extended.
+ *
+ * @param array $instance
+ *   An array of field instance info.
+ * @param array $context
+ *   An array of additional contextual information.
+ * @param bool $unaltered
+ *   If set to TRUE, then no settings alter hooks are called.
+ *
+ * @return array
+ *   An array of instance settings.
+ */
+function field_multiple_extended_field_instance_settings(array $instance, array $context = array(), $unaltered = FALSE) {
+  if (!empty($instance['settings']['field_multiple_extended'])) {
+    $settings = $instance['settings']['field_multiple_extended'];
+    $settings += field_multiple_extended_field_instance_default_settings();
+  }
+  else {
+    $settings = field_multiple_extended_field_instance_default_settings();
+  }
+
+  // Verify enabled instances still are supported.
+  if (!empty($settings['enabled'])) {
+    $settings['enabled'] = field_multiple_extended_is_supported($instance);
+  }
+
+  // Allow others to alter the settings.
+  if (!$unaltered) {
+    $context = $context ? $context : array();
+    $context['instance'] = $instance;
+    if (!isset($context['field']) && isset($instance['field_name'])) {
+      $context['field'] = field_info_field($instance['field_name']);
+    }
+    // Remove keys that should not be sent to the settings alters.
+    if (isset($context['form'])) {
+      // Remove form to avoid un-wanted alters on the parent form..
+      // The parent form is passed in by reference in
+      // field_multiple_extended_field_attach_form.
+      unset($context['form']);
+    }
+
+    drupal_alter('field_multiple_extended_field_instance_settings', $settings, $context);
+  }
+
+  // Flag the number of alters that are set.
+  $active_alters = array();
+  if (!empty($settings['enabled'])) {
+    if (!empty($settings['exclude_extra_item'])) {
+      $active_alters[] = 'exclude_extra_item';
+    }
+    if (!empty($settings['min_required']) && $settings['min_required'] > 0) {
+      $active_alters[] = 'min_required';
+    }
+    if (!empty($settings['max_allowed']) && $settings['max_allowed'] > 0) {
+      $active_alters[] = 'max_allowed';
+    }
+  }
+
+  $settings['active_alters'] = $active_alters;
+
+  return $settings;
+}
+
+/**
+ * Determines if the field widget is supported by this module.
+ *
+ * @param array $instance
+ *   An array of field instance info.
+ *
+ * @return bool
+ *   TRUE if it is supported.
+ */
+function field_multiple_extended_field_instance_is_supported(array $instance) {
+  if (!isset($instance['field_name'])) {
+    return FALSE;
+  }
+
+  // Get base field info.
+  $field = field_info_field($instance['field_name']);
+
+  // Widgets using the default multiple values behavior.
+  $supported = !empty($instance['widget']['type']) && field_behaviors_widget('multiple values', $instance) == FIELD_BEHAVIOR_DEFAULT;
+
+  // Allow others to alter.
+  drupal_alter('field_multiple_extended_field_instance_is_supported', $supported, $instance);
+
+  return $supported;
+}
+
+/**
+ * Determine if field_multiple_extended is enabled for the field instance.
+ *
+ * @param array $instance
+ *   An array of field instance info.
+ *
+ * @return bool
+ *   TRUE if it is enabled.
+ */
+function field_multiple_extended_is_supported(array $instance) {
+  $cache = &drupal_static(__FUNCTION__, array());
+  $cid = isset($instance['id']) ? $instance['id'] : NULL;
+  if (isset($cid)) {
+    if (isset($cache[$cid])) {
+      return $cache[$cid];
+    }
+
+    $cache[$cid] = FALSE;
+  }
+
+  $supported = FALSE;
+  if (isset($instance['field_name'])) {
+    $field = field_info_field($instance['field_name']);
+
+    // Only unlimited fields are supported.
+    if ($field && $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
+      // Pass to instance support check.
+      $supported = field_multiple_extended_field_instance_is_supported($instance);
+    }
+  }
+
+  if (isset($cid)) {
+    $cache[$cid] = $supported;
+  }
+
+  return $supported;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Implemented for field_ui_field_edit_form.
+ */
+function field_multiple_extended_form_field_ui_field_edit_form_alter(&$form, &$form_state) {
+  $instance = $form['#instance'];
+
+  $settings_values = array();
+  if (!empty($instance['settings']['field_multiple_extended'])) {
+    $settings_values = $instance['settings']['field_multiple_extended'];
+  }
+
+  $settings_form = _field_multiple_extended_field_instance_settings_form($settings_values);
+  if (!empty($settings_form)) {
+    $supported = field_multiple_extended_field_instance_is_supported($instance);
+
+    $form['instance']['settings']['field_multiple_extended'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Field Multiple Extended'),
+      '#collapsible' => TRUE,
+      '#collapsed' => !$supported,
+      '#weight' => 50,
+    );
+
+    if (!$supported) {
+      $settings_form['#disabled'] = TRUE;
+      $settings_form['enabled']['#default_value'] = 0;
+
+      $form['instance']['settings']['field_multiple_extended']['instance_support'] = array(
+        '#type' => 'item',
+        '#title' => t('The current field configuration is not supported.'),
+        '#markup' => t('The current field configuration provides custom multiple value handling which is not supported by the Field Multiple Extended module. The field form will not be altered regardless of the settings below.'),
+        '#prefix' => '<div class="messages warning">',
+        '#suffix' => '</div>',
+      );
+    }
+
+    // Enable only if cardinality is unlimited.
+    $form['instance']['settings']['field_multiple_extended']['#states'] = array(
+      'visible' => array(
+        ':input[name="field[cardinality]"]' => array(
+          'value' => FIELD_CARDINALITY_UNLIMITED,
+        ),
+      ),
+    );
+
+    // Append settings form to the fieldset.
+    $form['instance']['settings']['field_multiple_extended'] += $settings_form;
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Implemented for patternbuilder_settings_form.
+ */
+function field_multiple_extended_form_patternbuilder_settings_form_alter(&$form, &$form_state, $form_id) {
+  $settings_values = variable_get('field_multiple_extended_pb_importer', field_multiple_extended_patternbuilder_importer_default_settings());
+  $settings_form = _field_multiple_extended_field_instance_settings_form($settings_values);
+  if ($settings_form) {
+    $form['field_multiple_extended_pb_importer'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Field Multiple Extended: Importer Settings'),
+      '#description' => t('The following settings are applied to all imported fields except single item fields.'),
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+      '#tree' => TRUE,
+    );
+
+    // Default min_required is forced to 1.
+    unset($settings_form['min_required']);
+
+    // Max allowed is set with the imported field data.
+    unset($settings_form['max_allowed']);
+
+    // Merge the forms.
+    $form['field_multiple_extended_pb_importer'] += $settings_form;
+  }
+}
+
+/**
+ * Common form used for field instance settings.
+ *
+ * @param array $values
+ *   The current settings values.
+ *
+ * @return array
+ *   The settings form array.
+ */
+function _field_multiple_extended_field_instance_settings_form(array $values = array()) {
+  $values += field_multiple_extended_field_instance_default_settings();
+
+  $form = array();
+  $form['enabled'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable Field Multiple Extended'),
+    '#description' => t('If enabled then this module will alter the field multiple value form.'),
+    '#default_value' => $values['enabled'],
+    '#attributes' => array(
+      'class' => array('field-multiple-extended-form-item-enabled'),
+    ),
+  );
+
+  $form['exclude_extra_item'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Exclude the extra empty item'),
+    '#description' => t('By default in Drupal, an unlimited field has an extra field item form displayed. This is not ideal when using large field collection fields.'),
+    '#default_value' => $values['exclude_extra_item'],
+    '#prefix' => '<div class="field-multiple-extended-form-item-indented">',
+    '#suffix' => '</div>',
+    '#states' => array(
+      'visible' => array(
+        ':input.field-multiple-extended-form-item-enabled' => array(
+          'checked' => TRUE,
+        ),
+      ),
+    ),
+  );
+
+  $form['min_required'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Minimum required items'),
+    '#description' => t('Enter the minimum number of items that are required to be completed. By default in Drupal, a required field requires only 1 item to be completed. This setting adds a minimum number of items required that have to be completed for a required or optional field. Optional fields can be either empty or have the minimum number of items. Example: Minimum of 2 cards.'),
+    '#default_value' => $values['min_required'],
+    '#size' => 5,
+    '#prefix' => '<div class="field-multiple-extended-form-item-indented">',
+    '#suffix' => '</div>',
+    '#element_validate' => array('element_validate_integer_positive'),
+    '#states' => array(
+      'visible' => array(
+        ':input.field-multiple-extended-form-item-enabled' => array(
+          'checked' => TRUE,
+        ),
+      ),
+    ),
+  );
+
+  $form['max_allowed'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Maximum allowed items'),
+    '#description' => t('Enter the maximum number of items that are allowed. Example: Maximum of 10 cards. This setting can be changed per field instance since the field must be unlimited. If a field was stored with more items than the max allowed, then the items will be flagged as errors on the edit form only.'),
+    '#default_value' => $values['max_allowed'],
+    '#size' => 5,
+    '#prefix' => '<div class="field-multiple-extended-form-item-indented">',
+    '#suffix' => '</div>',
+    '#element_validate' => array('element_validate_integer_positive'),
+    '#states' => array(
+      'visible' => array(
+        ':input.field-multiple-extended-form-item-enabled' => array(
+          'checked' => TRUE,
+        ),
+      ),
+    ),
+  );
+
+  $form['#element_validate'][] = '_field_multiple_extended_field_instance_settings_form_validate';
+  $form['#attached']['css'][] = drupal_get_path('module', 'field_multiple_extended') . '/css/field_multiple_extended.admin.css';
+
+  return $form;
+}
+
+/**
+ * Form validation callback for settings form.
+ */
+function _field_multiple_extended_field_instance_settings_form_validate($elements, &$form_state, $complete_form) {
+  if (empty($form_state['values'])) {
+    return;
+  }
+
+  $values = drupal_array_get_nested_value($form_state['values'], $elements['#parents'], $key_exists);
+  if (!empty($values['enabled'])) {
+    if (isset($values['min_required']) && $values['min_required'] !== '' &&
+        isset($values['max_allowed']) && $values['max_allowed'] !== '') {
+      if ($values['min_required'] > $values['max_allowed']) {
+        form_error($elements, t('@label: The "Minimum required items" must be less than the "Maximum allowed items".', array(
+          '@label' => $elements['#title'],
+        )));
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_module_implements_alter().
+ */
+function field_multiple_extended_module_implements_alter(&$implementations, $hook) {
+  if ($hook == 'field_attach_form') {
+    // Firing last in hook_field_attach_form is necessary in order to alter
+    // the field_state's "max_delta".  This module's weight is set to high
+    // number during install so that its hooks fire last, specifically
+    // hook_module_implements_alter().
+    $group = $implementations['field_multiple_extended'];
+    unset($implementations['field_multiple_extended']);
+    $implementations['field_multiple_extended'] = $group;
+  }
+}
+
+/**
+ * Implements hook_field_attach_form().
+ */
+function field_multiple_extended_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
+  // Do not operate on programmed forms.
+  if (!empty($form_state['programmed'])) {
+    return;
+  }
+
+  foreach (field_info_instances($entity_type, $form['#bundle']) as $field_name => $instance) {
+    if (!isset($form[$field_name]) || !field_multiple_extended_is_supported($instance)) {
+      continue;
+    }
+
+    $field = field_info_field($field_name);
+    $element_langcode = $form[$field_name]['#language'];
+    $elements = &$form[$field_name][$element_langcode];
+    $items = field_get_items($entity_type, $entity, $field_name, $element_langcode);
+    $items = !empty($items) ? $items : array();
+    $context = array(
+      'form' => &$form,
+      'field' => $field,
+      'instance' => $instance,
+      'langcode' => $element_langcode,
+      'entity' => $entity,
+      'entity_type' => $entity_type,
+      'items' => $items,
+    );
+
+    _field_multiple_extended_field_elements_alter($elements, $form_state, $context);
+  }
+  unset($elements);
+}
+
+/**
+ * Alter form item elements for a multiple value field.
+ *
+ * This called by field_multiple_extended_field_attach_form() if the instance
+ * is supported.
+ *
+ * @param array $elements
+ *   The multivalue field widget form element. This contains form elements for
+ *   each field item for the element language.
+ * @param array $form_state
+ *   An associative array for the current state of the container form.
+ * @param array $context
+ *   An associative array with the following key-value pairs, matching the
+ *   arguments received by hook_field_widget_form():
+ *   - "form": The form structure where widgets are being attached to. This
+ *     might be a full form structure, or a sub-element of a larger form.
+ *   - "field": The field information array.
+ *   - "instance": The field instance information array.
+ *   - "langcode": The language associated with $items.
+ *   - "entity": The entity object.
+ *   - "entity_type": The entity type.
+ *   - "items": Array of default values stored on the entity for this field.
+ */
+function _field_multiple_extended_field_elements_alter(array &$elements, array &$form_state, array $context) {
+  // Do not operate on programmed forms.
+  if (!empty($form_state['programmed'])) {
+    return;
+  }
+
+  // Entity info.
+  list($entity_id, $entity_vid, $entity_bundle) = entity_extract_ids($context['entity_type'], $context['entity']);
+  $entity_is_new = empty($entity_id);
+
+  // Get all settings.
+  $settings = field_multiple_extended_field_instance_settings($context['instance'], $context);
+
+  // Exit if not enabled.
+  if (empty($settings['enabled']) || empty($settings['active_alters'])) {
+    return;
+  }
+
+  // Set some local variables.
+  $field_name = $context['instance']['field_name'];
+  $cardinality = $context['field']['cardinality'];
+  $langcode = $context['langcode'];
+  $required = !empty($context['instance']['required']);
+  $parents = $elements['#field_parents'];
+  $field_state = field_form_get_state($parents, $field_name, $langcode, $form_state);
+
+  // Store settings so can access in the validate callback without having to
+  // call the settings hooks again.
+  $field_state['field_multiple_extended_settings'] = $settings;
+
+  // Get the real count since other modules alter the field state items_count.
+  // This represents the non-empty items since field_default_submit alters
+  // the $items with _field_filter_items and _field_sort_items.
+  $items = $context['items'];
+  $items_count = count($items);
+
+  // Get actual elements and count. This is the most accurate since others can
+  // alter the count.
+  $elements_keys = element_children($elements);
+  $elements_deltas = array();
+  foreach ($elements_keys as $element_key) {
+    if (is_numeric($element_key)) {
+      $elements_deltas[] = $element_key;
+    }
+  }
+  $elements_count = count($elements_deltas);
+
+  // Determine if adding more.
+  $is_adding_more = !empty($form_state['triggering_element']['#field_add_more_trigger']);
+
+  // Set min required to the custom setting or Drupal default of 1.
+  $min_required = !empty($settings['min_required']) ? $settings['min_required'] : 0;
+
+  // Set max allowed.
+  $max_allowed = !empty($settings['max_allowed']) ? $settings['max_allowed'] : $cardinality;
+  if ($max_allowed != FIELD_CARDINALITY_UNLIMITED && $min_required > $max_allowed) {
+    $max_allowed = $min_required;
+  }
+
+  // Set max delta for altering.
+  $max_delta_original = $max_delta = $elements['#max_delta'];
+
+  // One-time alters.
+  if (empty($field_state['field_multiple_extended_init'])) {
+    // Keep the original items count as the stored / existing count.
+    // Once adding another, the entity object items get updated so it is not
+    // reliable to determine the stored count.
+    $stored_items_count = $field_state['field_multiple_extended_stored_count'] = !$entity_is_new ? $items_count : 0;
+
+    // Adjust max delta for plus 1 when not triggered by the add more button.
+    // The items_count is the current delta set by field_add_more_submit.
+    // Max delta is the current delta in all cases.
+    if (!empty($settings['exclude_extra_item']) && !$is_adding_more &&
+        $stored_items_count > 0 && $elements_count > 0 && $elements_count > $stored_items_count) {
+      $max_delta = $stored_items_count - 1;
+    }
+  }
+  else {
+    // Set stored count for calculations.
+    $stored_items_count = isset($field_state['field_multiple_extended_stored_count']) ? $field_state['field_multiple_extended_stored_count'] : 0;
+  }
+
+  // Set a flag for one-time alters.
+  $field_state['field_multiple_extended_init'] = TRUE;
+
+  // Check if add more is allowed.
+  $can_add_more = $max_allowed == FIELD_CARDINALITY_UNLIMITED || ($max_delta < $max_allowed - 1);
+
+  // Set a flag for easier checks.
+  $elements['#add_more_enabled'] = $can_add_more;
+
+  // Bound to max allowed.
+  // This enforces the max items when "exclude_extra_item" is disabled.
+  // When "exclude_extra_item" is enabled, the trailing item is removed and the
+  // add more button is remove which blocks from exceeding the max.
+  if (!$can_add_more && $elements_count > $max_allowed && (!$stored_items_count || $stored_items_count <= $max_allowed)) {
+    $max_delta = $max_allowed - 1;
+  }
+
+  // Store field state changes.
+  if ($max_delta != $max_delta_original) {
+    $field_state['items_count'] = $max_delta;
+  }
+  field_form_set_state($parents, $field_name, $langcode, $form_state, $field_state);
+
+  // Update form to adjusted $max_delta.
+  $elements['#max_delta'] = $max_delta;
+
+  // Set min delta.
+  $min_delta = $min_required && $min_required > 0 ? $min_required - 1 : 0;
+
+  // Process each item.
+  $max_allowed_item_check = !$entity_is_new && $max_allowed != FIELD_CARDINALITY_UNLIMITED;
+  foreach ($elements_deltas as $delta) {
+    // Remove the tail.
+    if ($delta > $max_delta) {
+      unset($elements[$delta]);
+      continue;
+    }
+
+    // Reference element.
+    $element = &$elements[$delta];
+
+    // Get children elements.
+    $element_children = element_children($element);
+    if ($element_children) {
+      $element_children = array_diff($element_children, array(
+        '_weight',
+        'remove_button',
+      ));
+    }
+
+    // Set new max.
+    $element['_weight']['#delta'] = $max_delta;
+
+    // Set min required.
+    if ($min_required && $delta <= $min_delta) {
+      // Required or optional depending on the normal required setting.
+      $element['#required'] = $required;
+
+      // Remove empty titles when there is only 1 child.
+      // This cleans up the "*" on the form item.
+      if ($required && count($element_children) == 1) {
+        foreach ($element_children as $child_key) {
+          if (isset($element[$child_key]['#title']) && empty($element[$child_key]['#title'])) {
+            // Hide title.
+            $element[$child_key]['#title_display'] = 'invisible';
+
+            // Set a title for form errors.
+            if (isset($element['#instance']['label'])) {
+              $element[$child_key]['#title'] = check_plain($element['#instance']['label']);
+            }
+          }
+        }
+      }
+    }
+
+    // Flag error for items orphaned by max_allowed reductions.
+    if ($max_allowed_item_check && $delta > ($max_allowed - 1)) {
+      // TODO: Should this form_error() on the 1st child element?
+      // Then the admin would see the error on the node edit form.
+      // Note: The validation error message will still show on a save attempt.
+      foreach ($element_children as $child_key) {
+        if (isset($element[$child_key]['#title']) && empty($element[$child_key]['#title'])) {
+          $element[$child_key]['#attributes']['class'][] = 'error';
+        }
+      }
+    }
+  }
+  unset($element);
+
+  // Append required to the title.
+  $requirements_label = _field_multiple_extended_field_requirements_label($required, $min_required, $max_allowed);
+  if ($requirements_label) {
+    // Set field element.
+    _field_multiple_extended_set_element_requirements_label($elements, $requirements_label);
+
+    // Sync title to the container element.
+    // This supports modules such as field_collection_fieldset that set a title
+    // on the wrapper element.
+    if (!empty($context['form'][$field_name]['#title'])) {
+      _field_multiple_extended_set_element_requirements_label($context['form'][$field_name], $requirements_label);
+    }
+  }
+
+  // Alter add more button.
+  if (isset($elements['add_more'])) {
+    if (isset($elements['add_more']['add_more'])) {
+      // Paragraphs widgets.
+      // Flag for easier checking.
+      $elements['add_more']['add_more']['#field_add_more_trigger'] = TRUE;
+      // Hide add_more container if limit has been reached.
+      // The container has the type select and add button.
+      $elements['add_more']['#access'] = $elements['#add_more_enabled'];
+    }
+    else {
+      // Flag for easier checking.
+      $elements['add_more']['#field_add_more_trigger'] = TRUE;
+
+      // Hide button if limit has been reached.
+      $elements['add_more']['#access'] = $elements['#add_more_enabled'];
+    }
+  }
+
+  // Add js.
+  if ($min_required) {
+    // Extract wrapper id.
+    // @see field_multiple_value_form()
+    $wrapper_id = NULL;
+    if (!empty($elements['#prefix']) && preg_match('@id\=\"([^\"]+)\"@US', $elements['#prefix'], $wrapper_matches)) {
+      $wrapper_id = $wrapper_matches[1];
+    }
+
+    if ($wrapper_id) {
+      $wrapper_base_id = preg_replace('@\-\-\d@', '', $wrapper_id);
+      $elements['#attached']['js'][] = array(
+        'type' => 'setting',
+        'data' => array(
+          'fieldMultipleExtended' => array(
+            $wrapper_base_id => array(
+              'htmlId' => $wrapper_id,
+              'min' => $min_required,
+            ),
+          ),
+        ),
+      );
+      $elements['#attached']['js'][] = drupal_get_path('module', 'field_multiple_extended') . '/js/field_multiple_extended.form.js';
+    }
+  }
+
+  // Add custom validation.
+  $elements['#element_validate'][] = '_field_multiple_extended_field_elements_validate';
+}
+
+/**
+ * Set the requirements label on a form element.
+ *
+ * @param array $element
+ *   The form element altered in place.
+ * @param string $label
+ *   The requirements label.
+ */
+function _field_multiple_extended_set_element_requirements_label(array &$element, $label) {
+  if (!empty($element['#title'])) {
+    // Append to title.
+    if (stripos($element['#title'], '<span class="form-required"') !== FALSE) {
+      // Support titles that already have the required marker appended.
+      $element['#title'] = preg_replace('@(\<span\sclass\=\"form-required\"[^\>]*\>\*\<\/span\>)@iUS', $label . ' $1', $element['#title']);
+    }
+    else {
+      // Append and let theme_field_multiple_value_form() add the required
+      // marker.
+      $element['#title'] .= ' ' . $label;
+    }
+  }
+  elseif (!empty($element['#description'])) {
+    // Append to description.
+    $element['#description'] .= ' ' . $label;
+  }
+  else {
+    // Set to description.
+    $element['#description'] = $label;
+  }
+}
+
+/**
+ * Build the label for the field requirements.
+ *
+ * @param bool $field_required
+ *   TRUE if the field instance is required.
+ * @param int $min_required
+ *   The minimum items required.
+ * @param int $max_allowed
+ *   The maximum items allowed.
+ *
+ * @return string
+ *   The requirements label.
+ */
+function _field_multiple_extended_field_requirements_label($field_required, $min_required, $max_allowed) {
+  $label = '';
+  if ($min_required > 1 && $max_allowed != FIELD_CARDINALITY_UNLIMITED && $max_allowed > 1) {
+    if ($min_required == $max_allowed) {
+      if ($field_required) {
+        $label = t('(@min Required)', array(
+          '@min' => $min_required,
+        ));
+      }
+      else {
+        $label = t('(@min Optional)', array(
+          '@min' => $min_required,
+        ));
+      }
+    }
+    else {
+      $label = t('(Min @min, Max @max)', array(
+        '@min' => $min_required,
+        '@max' => $max_allowed,
+      ));
+    }
+  }
+  elseif ($min_required > 1) {
+    $label = t('(Min @min)', array(
+      '@min' => $min_required,
+    ));
+  }
+  elseif ($max_allowed != FIELD_CARDINALITY_UNLIMITED && $max_allowed > 1) {
+    $label = t('(Max @max)', array(
+      '@max' => $max_allowed,
+    ));
+  }
+
+  return $label;
+}
+
+/**
+ * Form validation callback for _field_multiple_extended_field_elements_alter().
+ *
+ * Callback is added in _field_multiple_extended_field_elements_alter() only
+ * if settings are enabled.
+ *
+ * Element validate is used since hook_field_attach_validate() is not passed
+ * the form_state to determine if adding via ajax.
+ */
+function _field_multiple_extended_field_elements_validate($elements, &$form_state, $complete_form) {
+  // Exit if no values to validate.
+  if (empty($form_state['values'])) {
+    return;
+  }
+
+  $field_name = $elements['#field_name'];
+  $field_info = field_info_field($field_name);
+  $cardinality = $field_info['cardinality'];
+  $field_state = field_form_get_state($elements['#field_parents'], $field_name, $elements['#language'], $form_state);
+
+  // Exit if field state is lost.
+  if (empty($field_state['instance']) || empty($field_state['field_multiple_extended_settings'])) {
+    return;
+  }
+
+  // Get instance settings.
+  $instance = $field_state['instance'];
+  $settings = $field_state['field_multiple_extended_settings'];
+
+  $required = !empty($instance['required']);
+  $min_required = !empty($settings['min_required']) ? $settings['min_required'] : NULL;
+
+  $max_allowed = !empty($settings['max_allowed']) ? $settings['max_allowed'] : $cardinality;
+  if ($min_required && $max_allowed != FIELD_CARDINALITY_UNLIMITED && $min_required > $max_allowed) {
+    $max_allowed = $min_required;
+  }
+
+  // Determine if adding more.
+  $is_adding_more = !empty($form_state['triggering_element']['#field_add_more_trigger']);
+
+  // Extract non-empty item values.
+  $extracted_items = _field_multiple_extended_field_element_extract_items($elements, $form_state);
+  $items_count = count($extracted_items['non_empty']);
+  $items_original_count = count($extracted_items['original']);
+
+  // Min validation for required fields or optional fields if > 1 item.
+  $valid_min = TRUE;
+  if ($min_required && $min_required > 0 && ($required || $min_required > 1)) {
+    $valid_min = $items_count >= $min_required;
+    if (!$valid_min) {
+      if ($is_adding_more) {
+        // Allow dynamically adding up to min count.
+        $valid_min = $items_original_count < $min_required;
+      }
+      elseif (!$required) {
+        // Optionally required.
+        $valid_min = $items_count == 0;
+      }
+    }
+  }
+
+  // Max validation.
+  $valid_max = TRUE;
+  if ($max_allowed && $max_allowed != FIELD_CARDINALITY_UNLIMITED) {
+    $valid_max = $items_count <= $max_allowed;
+  }
+
+  // Throw errors.
+  if (!$valid_min || !$valid_max) {
+    if (!empty($elements['#title'])) {
+      $field_label = $elements['#title'];
+
+      // Strip min / max suffix.
+      $field_label = preg_replace('@\s*\([^\)]+\)$@', '', $field_label);
+    }
+    elseif ($instance['label']) {
+      $field_label = $instance['label'];
+    }
+    else {
+      $field_label = t('The field');
+    }
+
+    if (!$valid_min) {
+      // Do not show min error for min=1 and required since Drupal will show
+      // the error for field is required.
+      if ($min_required > 1 || !$required) {
+        $error_message_min = format_plural($min_required,
+          '@field_label requires a minimum of 1 item.',
+          '@field_label requires a minimum of @count items.',
+          array(
+            '@field_label' => $field_label,
+          )
+        );
+
+        form_error($elements, $error_message_min);
+      }
+    }
+
+    if (!$valid_max) {
+      $error_message_max = format_plural($max_allowed,
+        'The field "@field_label" allows a maximum of 1 item.',
+        'The field "@field_label" allows a maximum of @count items.',
+        array(
+          '@field_label' => $field_label,
+        )
+      );
+
+      form_error($elements, $error_message_max);
+    }
+  }
+}
+
+/**
+ * Determines the original and non-empty items for the field element.
+ *
+ * @param array $elements
+ *   The element containing all the field item elements.
+ * @param array $form_state
+ *   The form state.
+ *
+ * @return array
+ *   An array with the original and non_empty items.
+ */
+function _field_multiple_extended_field_element_extract_items($elements, $form_state) {
+  $return = array(
+    'original' => array(),
+    'non_empty' => array(),
+  );
+  if (empty($form_state['values'])) {
+    return $return;
+  }
+
+  $field_name = $elements['#field_name'];
+  $field_info = field_info_field($field_name);
+  $field_state = field_form_get_state($elements['#field_parents'], $field_name, $elements['#language'], $form_state);
+  if (empty($field_state)) {
+    return $return;
+  }
+
+  $items = array();
+  $item_values_exists = NULL;
+  $items_original = drupal_array_get_nested_value($form_state['values'], $elements['#parents'], $item_values_exists);
+  if ($item_values_exists) {
+    foreach (array_keys($items_original) as $item_key) {
+      // Remove non-items.
+      if (!is_numeric($item_key)) {
+        unset($items_original[$item_key]);
+        continue;
+      }
+
+      // Handle field item entity forms that build new objects in the field
+      // state. Examples: field_collection_item, paragraphs_item.
+      // If this is not set, then the field_is_empty check in
+      // _field_filter_items() fails.
+      if (isset($field_state['entity'][$item_key])) {
+        $items_original[$item_key] = array(
+          'entity' => $field_state['entity'][$item_key],
+        );
+      }
+    }
+
+    // Get non-empty items.
+    $items = _field_filter_items($field_info, $items_original);
+  }
+
+  $return['original'] = $items_original;
+  $return['non_empty'] = $items;
+  return $return;
+}

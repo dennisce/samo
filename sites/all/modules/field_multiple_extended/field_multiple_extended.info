@@ -1,0 +1,11 @@
+name = Field Multiple Extended
+description = Provides customizations per field instance for unlimited multiple value fields.
+core = 7.x
+package = Fields
+
+; Information added by Drupal.org packaging script on 2016-07-22
+version = "7.x-1.4"
+core = "7.x"
+project = "field_multiple_extended"
+datestamp = "1469211244"
+

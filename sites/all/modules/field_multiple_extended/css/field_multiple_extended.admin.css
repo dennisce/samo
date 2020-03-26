@@ -1,0 +1,10 @@
+/**
+ * Admin CSS styles for field_multiple_extended.
+ */
+
+/*.form-item-instance-settings-field-multiple-extended-min-required*/
+.field-multiple-extended-form-item-indented,
+.field-multiple-extended-form-item-indented ~ .description,
+.form-type-checkbox.field-multiple-extended-form-item-indented ~ .description {
+  margin-left: 2em;
+}

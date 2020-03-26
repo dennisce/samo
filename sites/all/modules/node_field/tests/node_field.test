@@ -1,0 +1,73 @@
+<?php
+
+/**
+ * @file
+ * Test creation and deletion of node field.
+ */
+
+/**
+ * Test node fields.
+ */
+class NodeFieldTestCase extends DrupalWebTestCase {
+
+  /**
+   * Run by simpletest. Return info about test.
+   */
+  public static function getInfo() {
+    return [
+      'name' => 'Node field test',
+      'description' => 'Node field module test',
+      'group' => 'Node field',
+    ];
+  }
+
+  /**
+   * Run by simpletest. Create environment for test.
+   */
+  public function setUp() {
+    parent::setUp('node_field');
+    $permissions = [
+      'administer site configuration',
+      'administer modules',
+      'access content',
+      'create article content',
+      'delete own article content',
+      'edit own article content',
+    ];
+    $user = $this->drupalCreateUser($permissions);
+    $this->drupalLogin($user);
+  }
+
+  /**
+   * Test method. Run by Simpletest.
+   *
+   * Create node and some node fields for it and then delete node.
+   */
+  public function testCreateDeleteFields() {
+    // Enable node fields for Article.
+    $node_field_settings = [
+      'node_field_node_types[article]' => TRUE,
+    ];
+    $this->drupalPost('admin/config/content/node-field', $node_field_settings, t('Save configuration'));
+    // Create an article.
+    $node_settings = [
+      'type' => 'article',
+      'title' => $this->randomName(10),
+      'body' => [LANGUAGE_NONE => [[$this->randomName(64)]]],
+    ];
+    $node = $this->drupalCreateNode($node_settings);
+    // Create one field of each type.
+    $node_field_types = node_field_types_info();
+    foreach ($node_field_types as $node_field_type) {
+      $field = [
+        'node_fields[new][type]' => $node_field_type['type'],
+        'node_fields[new][title]' => $this->randomName(8),
+      ];
+      $this->drupalPost('node/' . $node->nid . '/node-field', $field, t('Save'));
+    }
+    // Delete created article.
+    $delete = [];
+    $this->drupalPost('node/' . $node->nid . '/delete', $delete, t('Delete'));
+  }
+
+}

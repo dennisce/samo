@@ -1,0 +1,139 @@
+diff --git a/src/Plugin/views/area/ViewsPhp.php b/src/Plugin/views/area/ViewsPhp.php
+index d07f4cb..79797eb 100644
+--- a/src/Plugin/views/area/ViewsPhp.php
++++ b/src/Plugin/views/area/ViewsPhp.php
+@@ -61,7 +61,7 @@ class ViewsPhp extends TokenizeAreaPluginBase {
+    */
+   public function renderViewsPhp($value = FALSE) {// Execute output PHP code.
+     if ((!$value || !empty($this->options['empty'])) && !empty($this->options['php_output'])) {
+-      $function = create_function('$view, $handler, $results', ' ?>' . $this->options['php_output'] . '<?php ');
++      $function = views_php_create_function('$view, $handler, $results', ' ?>' . $this->options['php_output'] . '<?php ');
+       ob_start();
+       $function($this->view, $this, $this->view->result);
+       return ob_get_clean();
+diff --git a/src/Plugin/views/cache/ViewsPhp.php b/src/Plugin/views/cache/ViewsPhp.php
+index 005640c..ef049b9 100644
+--- a/src/Plugin/views/cache/ViewsPhp.php
++++ b/src/Plugin/views/cache/ViewsPhp.php
+@@ -86,7 +86,7 @@ class ViewsPhp extends CachePluginBase {
+         $cache = \Drupal::cache($this->resultsBin)->get($this->generateResultsKey());
+         $fresh = !empty($cache);
+         if ($fresh && !empty($this->options['php_cache_results'])) {
+-          $function = create_function('$view, $plugin, $cache', $this->options['php_cache_results'] . ';');
++          $function = views_php_create_function('$view, $plugin, $cache', $this->options['php_cache_results'] . ';');
+           ob_start();
+           $fresh = $function($this->view, $this, $cache);
+           ob_end_clean();
+@@ -108,7 +108,7 @@ class ViewsPhp extends CachePluginBase {
+         $cache = \Drupal::cache($this->outputBin)->get($this->generateOutputKey());
+         $fresh = !empty($cache);
+         if ($fresh && !empty($this->options['php_cache_output'])) {
+-          $function = create_function('$view, $plugin, $cache', $this->options['php_cache_output'] . ';');
++          $function = views_php_create_function('$view, $plugin, $cache', $this->options['php_cache_output'] . ';');
+           ob_start();
+           $fresh = $function($this->view, $this, $cache);
+           ob_end_clean();
+diff --git a/src/Plugin/views/field/ViewsPhp.php b/src/Plugin/views/field/ViewsPhp.php
+index 1b49cb6..b9adddf 100644
+--- a/src/Plugin/views/field/ViewsPhp.php
++++ b/src/Plugin/views/field/ViewsPhp.php
+@@ -119,7 +119,7 @@ class ViewsPhp extends FieldPluginBase {
+    */
+   public function render(ResultRow $values) {
+     if (!empty($this->options['php_output'])) {
+-      $this->php_output_lamda_function = create_function('$view, $handler, &$static, $row, $data, $value', ' ?>' . $this->options['php_output'] . '<?php ');
++      $this->php_output_lamda_function = views_php_create_function('$view, $handler, &$static, $row, $data, $value', ' ?>' . $this->options['php_output'] . '<?php ');
+ 
+       $normalized_row = new ViewsPhpNormalizedRow();
+       if (empty($this->view->style_plugin->rendered_fields)) {
+@@ -165,7 +165,7 @@ class ViewsPhp extends FieldPluginBase {
+   public function phpPreExecute() {
+     // Execute static PHP code.
+     if (!empty($this->options['php_setup'])) {
+-      $function = create_function('$view, $handler, &$static', $this->options['php_setup'] . ';');
++      $function = views_php_create_function('$view, $handler, &$static', $this->options['php_setup'] . ';');
+       ob_start();
+       $function($this->view, $this, $this->php_static_variable);
+       ob_end_clean();
+@@ -179,7 +179,7 @@ class ViewsPhp extends FieldPluginBase {
+   public function phpPostExecute(&$values) {
+     // Execute value PHP code.
+     if (!empty($this->options['php_value'])) {
+-      $function = create_function('$view, $handler, &$static, $row', $this->options['php_value'] . ';');
++      $function = views_php_create_function('$view, $handler, &$static, $row', $this->options['php_value'] . ';');
+       ob_start();
+       foreach ($this->view->result as $i => &$row) {
+         $normalized_row = new ViewsPhpNormalizedRow();
+@@ -200,7 +200,7 @@ class ViewsPhp extends FieldPluginBase {
+     if (!empty($this->options['use_php_click_sortable']) && !empty($this->php_click_sort_order)) {
+       if ($this->options['use_php_click_sortable'] == self::CLICK_SORT_PHP) {
+         if (!empty($this->options['php_click_sortable'])) {
+-          $this->php_click_sort_function = create_function('$view, $handler, &$static, $row1, $row2', $this->options['php_click_sortable'] . ';');
++          $this->php_click_sort_function = views_php_create_function('$view, $handler, &$static, $row1, $row2', $this->options['php_click_sortable'] . ';');
+         }
+       }
+       else {
+diff --git a/src/Plugin/views/filter/ViewsPhp.php b/src/Plugin/views/filter/ViewsPhp.php
+index 89ae41e..4ecf279 100644
+--- a/src/Plugin/views/filter/ViewsPhp.php
++++ b/src/Plugin/views/filter/ViewsPhp.php
+@@ -83,7 +83,7 @@ class ViewsPhp extends FilterPluginBase {
+   function phpPreExecute() {
+     // Execute static PHP code.
+     if (!empty($this->options['php_setup'])) {
+-      $function = create_function('$view, $handler, &$static', $this->options['php_setup'] . ';');
++      $function = views_php_create_function('$view, $handler, &$static', $this->options['php_setup'] . ';');
+       ob_start();
+       $function($this->view, $this, $this->php_static_variable);
+       ob_end_clean();
+@@ -97,7 +97,7 @@ class ViewsPhp extends FilterPluginBase {
+   function phpPostExecute() {
+     // Evaluate the PHP code.
+     if (!empty($this->options['php_filter'])) {
+-      $function = create_function('$view, $handler, &$static, $row, $data', $this->options['php_filter'] . ';');
++      $function = views_php_create_function('$view, $handler, &$static, $row, $data', $this->options['php_filter'] . ';');
+       ob_start();
+ 
+       $normalized_row = new ViewsPhpNormalizedRow();
+diff --git a/src/Plugin/views/sort/ViewsPhp.php b/src/Plugin/views/sort/ViewsPhp.php
+index 6b391ce..c50a1f3 100644
+--- a/src/Plugin/views/sort/ViewsPhp.php
++++ b/src/Plugin/views/sort/ViewsPhp.php
+@@ -72,7 +72,7 @@ class ViewsPhp extends SortPluginBase {
+   function phpPreExecute() {
+     // Execute static PHP code.
+     if (!empty($this->options['php_setup'])) {
+-      $function = create_function('$view, $handler, &$static', $this->options['php_setup'] . ';');
++      $function = views_php_create_function('$view, $handler, &$static', $this->options['php_setup'] . ';');
+       ob_start();
+       $function($this->view, $this, $this->php_static_variable);
+       ob_end_clean();
+@@ -85,7 +85,7 @@ class ViewsPhp extends SortPluginBase {
+    */
+   function phpPostExecute() {
+     if (!empty($this->options['php_sort']) && $this->view->style_plugin->buildSort()) {
+-      $this->php_sort_function = create_function('$view, $handler, &$static, $row1, $row2', $this->options['php_sort'] . ';');
++      $this->php_sort_function = views_php_create_function('$view, $handler, &$static, $row1, $row2', $this->options['php_sort'] . ';');
+       ob_start();
+       usort($this->view->result, array($this, 'phpSort'));
+       ob_end_clean();
+diff --git a/views_php.module b/views_php.module
+index 9d6ac0e..1e0afe0 100644
+--- a/views_php.module
++++ b/views_php.module
+@@ -204,4 +204,14 @@ function views_php_views_pre_render(ViewExecutable $view) {
+       $view->result = array_slice($view->result, $offset, $item_per_page);
+     }
+   }
++}
++
++
++
++
++/**
++ * Internal support: create_function() emulation using anonymous functions.
++ */
++function views_php_create_function($args, $code) {
++  return eval('return function (' . $args . ') {' . $code . '};');
+ }
+\ No newline at end of file

@@ -1,0 +1,43 @@
+<?php
+
+/**
+ * @file
+ * Field Multiple Extended install file.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function field_multiple_extended_install() {
+  _field_multiple_extended_install_set_module_weight();
+}
+
+/**
+ * Set the module weight so that this module's hooks fire last.
+ */
+function _field_multiple_extended_install_set_module_weight() {
+  // Get the current max.
+  $max = db_query("SELECT MAX(weight) FROM {system}")->fetchField();
+  $max = $max ? $max : 10;
+
+  // Set a new weight.
+  $weight = $max + 1000;
+  db_update('system')
+    ->fields(array('weight' => $weight))
+    ->condition('name', 'field_multiple_extended')
+    ->execute();
+}
+
+/**
+ * Increase the weight so this module's hooks fire last.
+ */
+function field_multiple_extended_update_7101() {
+  // Pass to 7102.
+}
+
+/**
+ * Increase the weight above the current system max weight.
+ */
+function field_multiple_extended_update_7102() {
+  _field_multiple_extended_install_set_module_weight();
+}

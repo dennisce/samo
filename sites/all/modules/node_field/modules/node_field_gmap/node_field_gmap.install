@@ -1,0 +1,31 @@
+<?php
+
+/**
+ * @file
+ * Check Google Maps API Key.
+ */
+
+/**
+ * Implements hook_requirements().
+ */
+function node_field_gmap_requirements($phase) {
+  $requirements = array();
+  $t = get_t();
+  if ($phase == 'runtime') {
+    $requirements['node_field_gmap'] = array(
+      'title' => $t('Node Field Gmap'),
+      'value' => 'Google Maps API Key is configured',
+      'severity' => REQUIREMENT_OK,
+    );
+    if (!variable_get('node_field_gmap_api_key', '')) {
+      $options = array('@url' => url('admin/config/content/node-field'));
+      $requirements['node_field_gmap'] = array(
+        'value' => '',
+      ) + $requirements['node_field_gmap'];
+      $requirements['node_field_gmap']['value'] = $t('Google Maps API Key is not configured');
+      $requirements['node_field_gmap']['description'] = $t('Configured Google Maps API Key on the module\'s <a href="@url">settings page</a>.', $options);
+      $requirements['node_field_gmap']['severity'] = REQUIREMENT_WARNING;
+    }
+  }
+  return $requirements;
+}
