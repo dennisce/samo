@@ -4,6 +4,15 @@ ini_set('max_execution_time', '3000');
 ini_set('display_errors', 'On');
 error_reporting(E_ALL | E_STRICT);
 
+if(isset($_GET['dev'])){
+
+  $n node_load(68);
+  echo "<pre>";
+  print_r($n);
+
+}
+
+
 global $base_url;
 $lib = $base_url."/".libraries_get_path('jsgrid');
 
