@@ -39,10 +39,10 @@ j(document).ready(function (){
 					location.href = "#overlay=user/"+uid[1]+"/edit";
 					break;
 				case 'pront':
-					location.href = "#overlay=/admin/prontuario/"+uid[1]+"/ALL";
+					location.href = "#overlay=admin/prontuario/"+uid[1]+"/ALL";
 					break;
 				case 'resum':
-					location.href = "#overlay=/resumo-financeiro/"+uid[1];
+					location.href = "#overlay=resumo-financeiro/"+uid[1];
 					break;
 				case 'orcam':
 					location.href = "#overlay=orcamentos/"+uid[1];
