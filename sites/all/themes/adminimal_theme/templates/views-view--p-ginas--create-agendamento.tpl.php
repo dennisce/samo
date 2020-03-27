@@ -13,6 +13,7 @@ if(isset($_GET['dev'])){
 }
 
 global $base_url;
+global $user;
 $lib = $base_url."/".libraries_get_path('jsgrid');
 
 
@@ -45,7 +46,14 @@ $agendamentoStatusValue           = '';
 $agendamentotipoAgendamentoValues = [];
 $agendamentoData                  = '';
 $agendamentoHora                  = '';
-$profissionalId                   = $q[count($q)-1];
+if(isset($user->roles[4]) && !isset($user->roles[3])){
+
+  $profissionalId                 = $user->uid;
+
+} else {
+  $profissionalId                 = $q[count($q)-1];
+}
+
 if($q[count($q)-3] != 'agendamento'){
   $agendamentoId                    = $q[count($q)-3];
   $agendamento                      = node_load($agendamentoId);
@@ -61,8 +69,6 @@ if($q[count($q)-3] != 'agendamento'){
 }
 
 // Libs de javascript necessários para essa tela
-drupal_add_js(path_to_theme().'/js/jquery.npContextMenu.js');
-drupal_add_js(path_to_theme().'/js/utils.js');
 drupal_add_js(path_to_theme().'/js/manipulaAgendamento.js');
 drupal_add_js(path_to_theme().'/js/moment.min.js');
 
@@ -313,7 +319,6 @@ j(document).ready(function(){
       $bto[$i]['attr']    = 'onClick="alteraStatus(\''.$base_url.'\',\'2\')"';
       $bto[$i]['value']   = 'EM ESPERA';
     }
-    global $user;
     
     if(($user->uid == $profissionalId || isset($user->roles[3]) || isset($user->roles[4]))){
       $i++;
