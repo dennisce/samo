@@ -3541,6 +3541,7 @@ div.field-container table .footer td{
 /*Resumo financeiro*/
 .card{
   width: 30%;
+  min-height: 182px;
   float: left;
   margin: 15px;
   box-shadow: inset 0px -20px 17px -26px black;
@@ -3584,4 +3585,48 @@ div.field-container table .footer td{
   top: 0;
   left: 15px;
   height: 44px;
+}
+
+/*Print PRODUTIVIDADE*/
+.print-content .card{
+  min-height: 110px;
+  box-shadow: none;
+  background-color: #EFEFEF;
+  border: 1px solid;
+}
+.print-content .views-exposed-form,
+.print-content .detalharAgendamento{
+  display: none;
+}
+.print-content .card div{
+  margin: 20px 0 20px;
+}
+
+/*Produtividade*/
+.card .periodo{
+  text-align: center;
+  font-size: 20px;
+  margin: 20px 0 75px;
+}
+
+.view-relat-rio-de-produtividade #edit-field-data-value-wrapper .views-widget #edit-field-data-value-min-wrapper,
+.view-relat-rio-de-produtividade #edit-field-data-value-wrapper .views-widget #edit-field-data-value-max-wrapper{
+  float: left;
+}
+
+.view-relat-rio-de-produtividade #edit-field-data-value-wrapper .views-widget .container-inline-date .form-item label{
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.view-relat-rio-de-produtividade .views-submit-button{
+  clear: both;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+.view-relat-rio-de-produtividade .views-submit-button input{
+  margin: 0!important;
+  width: 100%;
 }

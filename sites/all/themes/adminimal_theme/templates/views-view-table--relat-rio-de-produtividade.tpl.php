@@ -21,18 +21,29 @@
  */
 global $base_url;
 $totalPago = 0.00;
-$pid = explode('/',$_GET['q']);
-if(!isset($pid[1])){
-  $pid[1] = "ALL";
+$uid = explode('/',$_GET['q']);
+if(!isset($uid[1])){
+  $uid[1] = "ALL";
 }
 
-$paciente = user_load($pid[1]);
+$profissional = user_load($uid[1]);
+
+if(isset($_GET['field_data_value'])){
+  $s = explode('/',$_GET['field_data_value']['min']['date']);
+  $start = rawurlencode($s[2].'-'.$s[1].'-'.$s[0])." 00:00:00";
+
+  $e = explode('/',$_GET['field_data_value']['max']['date']);
+  $end = rawurlencode($e[2].'-'.$e[1].'-'.$e[0])." 00:00:00";
+}
+
 ?>
 <script>
+  var j = jQuery.noConflict();
+
     j(document).ready(function(){
 
       //Pegar os valores do saldo TOTAL
-      j.get("<?=$base_url?>/getSaldo?pid=<?=$pid[1]?>", function(ret){
+      j.get("<?=$base_url?>/getSaldo?uid=<?=$uid[1]?>&start=<?=$start?>&end=<?=$end?>", function(ret){
 
         var saldo = JSON.parse(ret);
 
@@ -42,9 +53,9 @@ $paciente = user_load($pid[1]);
             currency: 'GBP',
             minimumFractionDigits: 2,
         }).format(number);
-        j('#saldo .valor').html("<b>R$ " + reais + "</b>");
+        // j('#saldo .valor').html("<b>R$ " + reais + "</b>");
         let situacao = (number < 0)?"debito":"credito";
-        j('#saldo .valor').addClass(situacao);
+        // j('#saldo .valor').addClass(situacao);
 
         reais = new Intl.NumberFormat('pt-BR', {
             style: 'decimal',
@@ -64,19 +75,13 @@ $paciente = user_load($pid[1]);
     });
 </script>
 <fieldset class="dados view-display-id-block_pacientes">
-<legend>Dados do Paciente</legend>
-  <div class="views-field-field-nome-completo">
-    <sup><b>Paciente:</b></sup>
-    <h1 class="views-row field-content uid-<?=$paciente->uid?>"><?=$paciente->field_nome_completo['und'][0]['value']?> (<?=$paciente->uid?>)</h1>
-    <div class="views-field-field-telefone">
-      <div class="field-content telefone-<?=$paciente->uid?>"><?=$paciente->field_telefone['und'][0]['value']?></div>
+<legend><?=$profissional->field_nome_completo['und'][0]['value']?> (<?=$profissional->uid?>)</legend>
+  <div class="card" id="periodo">
+    <span class="cardTitle">PERÍODO</span>
+    <sup class="cardSubTitle">Período considerado para o relatório</sup>
+    <div class="periodo valor">
+      <?=$_GET['field_data_value']['min']['date']?> a <?=$_GET['field_data_value']['max']['date']?>
     </div>
-  </div>
-
-  <div class="card" id="pago">
-    <span class="cardTitle">PAGO</span>
-    <sup class="cardSubTitle">Consolidado de valores pagos pelo paciente</sup>
-    <div class="valor credito"></div>
   </div>
   <div class="card" id="executado">
     <span class="cardTitle">EXECUTADO</span>
@@ -84,8 +89,8 @@ $paciente = user_load($pid[1]);
     <div class="valor debito"></div>
   </div>
   <div class="card" id="saldo">
-    <span class="cardTitle">SALDO</span>
-    <sup class="cardSubTitle">Com base no que já foi pago <b>MENOS</b> o que foi executado</sup>
+    <span class="cardTitle">REPASSE</span>
+    <sup class="cardSubTitle">Valor do repasse a ser realizado para o profissional</sup>
     <div class="valor"></div>
   </div>
   <table <?php if ($classes): ?> class="<?php print $classes; ?>"<?php endif ?><?php print $attributes; ?>>

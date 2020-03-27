@@ -222,7 +222,7 @@ function formatDate(date) {
 }
 function calculaSaldoTotal(base_url,pid){
   //Pegar os valores do saldo TOTAL
-  j.get(base_url+"/getSaldoPaciente?pid="+pid, function(ret){
+  j.get(base_url+"/getSaldo?pid="+pid, function(ret){
 
     var saldo = JSON.parse(ret);
 

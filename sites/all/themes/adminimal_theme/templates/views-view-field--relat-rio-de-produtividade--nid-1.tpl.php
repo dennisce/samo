@@ -23,20 +23,14 @@
  */
     
     global $base_url;
-    $pid = explode('/',$_GET['q']);
-    $extrato = json_decode(file_get_contents($base_url."/getSaldo?pid=".$pid[1]."&nid=".$output));
+    $uid = explode('/',$_GET['q']);
+    $extrato = json_decode(file_get_contents($base_url."/getSaldo?uid=".$uid[1]."&nid=".$output));
     $saldo = floatval($extrato[0]->totalPago - $extrato[0]->totalExecutado);
     $linha = $row->_field_data['nid']['entity'];
 ?>
 <div class="detalharAgendamento">
-    <a href="<?=$base_url?>/admin/create/agendamento/<?=$row->nid?>/<?=$pid[1]?>/<?=$linha->field_profissional['und'][0]['target_id']?>">
+    <a href="<?=$base_url?>/admin/create/agendamento/<?=$row->nid?>/<?=$linha->field_paciente['und'][0]['target_id']?>/<?=$linha->field_profissional['und'][0]['target_id']?>">
         <img src="<?=$base_url?>/sites/all/themes/adminimal_theme/icons/info.png" />
     </a>
 </div>
-<ul class="resumo">
-    <li class="credito"><b>PAGO: </b>R$ <?=number_format($extrato[0]->totalPago,'2',',','.')?></li>
-    <li class="debito"><b>EXECUTADO: </b>R$ <?=number_format($extrato[0]->totalExecutado,'2',',','.')?></li>
-    <li class="<?= (floatval($saldo) < 0)?"debito":"credito" ?>"><b>SALDO: </b>R$ <?=number_format($saldo,'2',',','.')?></li>
-</ul>
-
-<pre>
+<h1>R$ <?=number_format($extrato[0]->totalExecutado,'2',',','.')?></h1>

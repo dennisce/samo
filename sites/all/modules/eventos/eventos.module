@@ -59,8 +59,8 @@ function eventos_menu() {
     'access arguments' => array('access content')
   );
 
-  $items['getSaldoPaciente'] = array(
-    'delivery callback' => 'getSaldoPaciente',
+  $items['getSaldo'] = array(
+    'delivery callback' => 'getSaldo',
     'type' => MENU_CALLBACK,
     'access arguments' => array('access content')
   );
@@ -394,8 +394,8 @@ function getEventosByProfissional(){
 
   }
  
-  $dtInicial = str_replace("T"," ",$_GET['start']);
-  $dtFinal = str_replace("T"," ",$_GET['end']);
+  $start = str_replace("T"," ",$_GET['start']);
+  $end = str_replace("T"," ",$_GET['end']);
   $uid = $_GET['uid'];
 
   $sql = "
@@ -410,9 +410,9 @@ function getEventosByProfissional(){
   WHERE 
     type = 'agendamento'
   AND
-    d.field_data_value > '$dtInicial'
+    d.field_data_value > '$start'
   AND 
-    d.field_data_value2 < '$dtFinal'
+    d.field_data_value2 < '$end'
   AND
     p.field_profissional_target_id = $uid
   "; 
@@ -624,7 +624,7 @@ function getCalculo($agendamentoId,$retorno,$tipo){
   return $retorno;
 }
 
-function getSaldoPaciente(){
+function getSaldo(){
   
   $totalExecutado  = 0.00;
   $totalPago  = 0.00;
@@ -632,28 +632,64 @@ function getSaldoPaciente(){
   $objSaldo = new stdClass();
 
   if(isset($_GET['pid'])){
+    // Recupera o saldo por PACIENTE
     $pid = $_GET['pid'];
+    $sql = "
+      SELECT nid FROM node as n
+
+      INNER JOIN field_data_field_paciente as pid
+      ON n.nid = pid.entity_id
+
+      WHERE pid.field_paciente_target_id = $pid
+      "; 
+  } elseif(isset($_GET['uid'])){
+    // Para relatório de produtividade por período
+    $uid = intval($_GET['uid']);
+    $sql = "
+      SELECT nid FROM node as n
+
+      INNER JOIN field_data_field_data as d
+      ON n.nid = d.entity_id
+      
+      INNER JOIN field_data_field_profissional as p
+      ON n.nid = p.entity_id
+      
+      WHERE 
+        type = 'agendamento'
+      "; 
+
+    if(isset($_GET['start']) && $_GET['end']){
+
+      $start = $_GET['start'];
+      $end = $_GET['end'];
+      $sql .= "
+      AND
+        d.field_data_value > '$start'
+      AND 
+        d.field_data_value2 < '$end'
+      AND
+        p.field_profissional_target_id = $uid
+      
+      ";
+    }
+
   } else {
     die(0.00);
   }
 
-  $sql = "
-  SELECT nid FROM node as n
-
-  INNER JOIN field_data_field_paciente as pid
-  ON n.nid = pid.entity_id
-
-  WHERE pid.field_paciente_target_id = $pid
-  "; 
+  
   
   $event = Array();
-  $result = db_query($sql);
+  $result = db_query($sql); 
+
   foreach($result as $row){
     
     if(isset($_GET['nid']) && $row->nid == $_GET['nid']){
+      // Separa os pagamentos por agendamento
       $totalPago      = getCalculo($row->nid,$totalPago,'pago');
       $totalExecutado = getCalculo($row->nid,$totalExecutado,'executado');
     } elseif(!isset($_GET['nid'])) {
+      // Consolida valores totais, sem separação por agendamento
       $totalPago      = getCalculo($row->nid,$totalPago,'pago');
       $totalExecutado = getCalculo($row->nid,$totalExecutado,'executado');
     }
