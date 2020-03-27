@@ -68,8 +68,8 @@ legend {
 }
 
 h1,h2,h3,h4,h5,h6 {
-  font-family: "Open Sans", "Segoe UI", "Helvetica", sans-serif;
-  font-weight: 300;
+  font-family: "Open Sans", "Segoe UI", "Helvetica", sans-serif!important;
+  font-weight: 300!important;
   margin: 0 0 20px;
 }
 
@@ -3332,8 +3332,17 @@ button.active{
 .fc-today{
   background-color: #f5fdf7!important;
 }
+
+/* Create Agendamentos*/
 .dados{
   clear: both;
+}
+.dados h1{
+  margin:0;
+  font-size:23px;
+}
+.dados .views-field-field-telefone{
+  margin-bottom: 10px;
 }
 .dados ul li{
   width: auto!important;
@@ -3407,39 +3416,57 @@ button.active{
 }
 
 /*Sidebar Pacientes*/
-#block-views-usuarios-block-pacientes{
+.region-sidebar-left #block-views-usuarios-block-pacientes{
   margin-top: 10px;
 }
-#edit-field-nome-completo-value-wrapper{
+.region-sidebar-left #edit-field-nome-completo-value-wrapper{
   float: left;
   padding:0;
 }
-#edit-field-nome-completo-value-wrapper label{
+.region-sidebar-left #edit-field-nome-completo-value-wrapper label{
   font-size: 12px;
 }
-#edit-field-nome-completo-value-wrapper input{
+.region-sidebar-left #edit-field-nome-completo-value-wrapper input{
   width:193px;
 }
-#views-exposed-form-usuarios-block-pacientes .views-exposed-widget,
-#views-exposed-form-usuarios-block-pacientes .views-exposed-widget .form-item-field-nome-completo-value{
+.region-sidebar-left #views-exposed-form-usuarios-block-pacientes .views-exposed-widget,
+.region-sidebar-left #views-exposed-form-usuarios-block-pacientes .views-exposed-widget .form-item-field-nome-completo-value{
   padding: 0;
   margin: 0;
 }
-#views-exposed-form-usuarios-block-pacientes .views-submit-button input{
+.region-sidebar-left #views-exposed-form-usuarios-block-pacientes .views-submit-button input{
   margin: 4px 0 0 0;
   padding: 5px;
 }
-
-.view-display-id-block_pacientes ul li{
+.region-sidebar-left .view-display-id-block_pacientes ul li{
   padding: 5px;
   border-bottom: 1px dashed #CCC;
   font-size: 12px;
 }
-.view-display-id-block_pacientes ul li .views-field-field-nome-completo{
+.region-sidebar-left .view-display-id-block_pacientes ul li .views-field-field-nome-completo{
   font-weight: bold;
 }
 
 /*Menu de contexto*/
+.dropdown-menu{
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  display: none;
+  float: left;
+  min-width: 10rem;
+  padding: .5rem 0;
+  margin: .125rem 0 0;
+  font-size: 1rem;
+  color: #212529;
+  text-align: left;
+  list-style: none;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid rgba(0,0,0,.15);
+  border-radius: .25rem;
+}
 #superMenu li{
   border-bottom: 1px dashed #ccc;
   padding: 5px;

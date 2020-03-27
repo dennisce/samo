@@ -12,9 +12,9 @@ if(isset($_GET['dev'])){
 
 }
 
-
 global $base_url;
 $lib = $base_url."/".libraries_get_path('jsgrid');
+
 
 // Para a listagem de profissionais do input
 function users_by_role($role_name) {
@@ -61,6 +61,7 @@ if($q[count($q)-3] != 'agendamento'){
 }
 
 // Libs de javascript necessários para essa tela
+drupal_add_js(path_to_theme().'/js/jquery.npContextMenu.js');
 drupal_add_js(path_to_theme().'/js/utils.js');
 drupal_add_js(path_to_theme().'/js/manipulaAgendamento.js');
 drupal_add_js(path_to_theme().'/js/moment.min.js');
@@ -234,6 +235,7 @@ j(document).ready(function(){
   j("#jsGridPagamentos").jsGrid("loadData");
 
 <?php } ?>
+
   });
 
 
@@ -250,9 +252,15 @@ j(document).ready(function(){
     <option <?=$selected?> value="<?=$k?>"><?=$v?></option>
     <?php } ?>
   </select>
-  <fieldset class="dados">
+  <fieldset class="dados view-display-id-block_pacientes">
     <legend>Dados do Agendamento</legend>
-    <sup><b>Paciente:</b></sup><h1><?=$paciente->field_nome_completo['und'][0]['value']?> (<?=$paciente->uid?>)</h1>
+    <div class="views-field-field-nome-completo">
+      <sup><b>Paciente:</b></sup>
+      <h1 class="views-row field-content uid-<?=$paciente->uid?>"><?=$paciente->field_nome_completo['und'][0]['value']?> (<?=$paciente->uid?>)</h1>
+      <div class="views-field-field-telefone">
+        <div class="field-content telefone-<?=$paciente->uid?>"><?=$paciente->field_telefone['und'][0]['value']?></div>
+      </div>
+    </div>
     <input type="hidden" name="idPaciente" id="idPaciente" value="<?=$paciente->uid?>" />
     <ul id="menuAgendamento">
       <li><sup><b>Dia:</b></sup></li>

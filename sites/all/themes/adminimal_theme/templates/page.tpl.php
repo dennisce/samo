@@ -4,8 +4,11 @@
 	$mask = $base_url."/".libraries_get_path('maskedinput') . '/src/jquery.mask.js';
 	drupal_add_js($base_url."/".path_to_theme().'/js/jquery.npContextMenu.js');
 	drupal_add_js($mask);
+	drupal_add_js($base_url."/".path_to_theme().'/js/utils.js');
+	// die($lib."/core/bootstrap.min.css");
 
 ?>
+
 
 <script type="text/javascript">
 var j = jQuery.noConflict();
@@ -29,50 +32,9 @@ j(document).ready(function (){
 		}
 	});
 
-	//Context
-	j("#superMenu").superMenu({
-	    onMenuOptionSelected: function (invokedOn, selectedMenu) {
-			let uid = invokedOn.className.split('uid-');
-			let action = selectedMenu.id;
-			switch (action) {
-				case 'edita':
-					location.href = "#overlay=user/"+uid[1]+"/edit";
-					break;
-				case 'pront':
-					location.href = "#overlay=admin/prontuario/"+uid[1]+"/ALL";
-					break;
-				case 'resum':
-					location.href = "#overlay=resumo-financeiro/"+uid[1];
-					break;
-				case 'orcam':
-					location.href = "#overlay=orcamentos/"+uid[1];
-					break;
-				case 'whats':
-					
-					break;
-				default:
-					break;
-			}
-    	}
-	});
-
-	addContextMenu();
-	Drupal.behaviors.contextMenu = {
-		attach: function(context, settings){
-			addContextMenu();
-		}
-	};
-
+	
 });
 
-function addContextMenu(){
-	j(".view-display-id-block_pacientes li").on("click contextmenu", function(e){
-		let uid = e.currentTarget.className.split('uid-');
-		let nomePaciente = j(".uid-"+uid[1]+" span.views-field-field-nome-completo span").html();
-		j('#superMenu li h7').html(nomePaciente);
-		j("#superMenu").trigger("npmenu:show",e);
-	});
-}
 
 </script>
 

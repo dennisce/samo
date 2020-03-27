@@ -1,3 +1,53 @@
+
+  var j = jQuery.noConflict();
+  
+j(document).ready(function(){
+  var SPMaskBehavior = function (val) {
+    return val.replace(/\D/g, '').length === 11 ? '(00) 00000-0000' : '(00) 0000-00009';
+  },
+  spOptions = {
+    onKeyPress: function(val, e, field, options) {
+        field.mask(SPMaskBehavior.apply({}, arguments), options);
+      }
+  };
+  j("#edit-telefone").mask(SPMaskBehavior,spOptions);
+  addContextMenu();
+  Drupal.behaviors.contextMenu = {
+    attach: function(context, settings){
+      addContextMenu();
+    }
+  };
+
+  //Context
+  j("#superMenu").superMenu({
+    onMenuOptionSelected: function (invokedOn, selectedMenu) {
+    
+      let uid = invokedOn.className.split('uid-');
+      let action = selectedMenu.id;
+      switch (action) {
+        case 'edita':
+          selectedMenu.href = Drupal.settings.basePath+"user/"+uid[1]+"/edit";
+          break;
+        case 'pront':
+          selectedMenu.href = Drupal.settings.basePath+"admin/prontuario/"+uid[1]+"/ALL";
+          break;
+        case 'resum':
+          selectedMenu.href = Drupal.settings.basePath+"resumo-financeiro/"+uid[1];
+          break;
+        case 'orcam':
+          selectedMenu.href = Drupal.settings.basePath+"orcamentos/"+uid[1];
+          break;
+        case 'whats':
+          enviaWpp(uid[1]);
+          break;
+        default:
+          break;
+      }
+    }
+  });
+});
+
+
 function autoCompleteJS(base_url,autoComplete){
 
     autoComplete = new jsGrid.Field({
@@ -202,20 +252,37 @@ function calculaSaldoTotal(base_url,pid){
 
   });
 }
-if(!j){
 
-  var j = jQuery.noConflict();
-  var SPMaskBehavior = function (val) {
-    return val.replace(/\D/g, '').length === 11 ? '(00) 00000-0000' : '(00) 0000-00009';
-  },
-  spOptions = {
-    onKeyPress: function(val, e, field, options) {
-        field.mask(SPMaskBehavior.apply({}, arguments), options);
-      }
-  };
-  j(document).ready(function(){
-    j("#edit-telefone").mask(SPMaskBehavior,spOptions);
-  });
+
+function addContextMenu(){
+	j(".view-display-id-block_pacientes .views-row").on("click contextmenu", function(e){
+		j("#superMenu").trigger("npmenu:show",e);
+
+		let uid = e.currentTarget.className.split('uid-');
+		let nomePaciente = j(".uid-"+uid[1]+" .views-field-field-nome-completo .field-content").html();
+				
+		let bodyMargin = parseInt(j('body').css('margin-top').replace("px",''));
+		let overlay = "0px";
+    if(j('#overlay').css('padding-top')){
+      overlay = j('#overlay').css('padding-top');
+      nomePaciente = j(".uid-"+uid[1]).html();
+    }
+		let overlayPadding = parseInt(overlay.replace("px",''));
+		let top = (bodyMargin+overlayPadding);
+		j("#superMenu").css("top",(e.pageY-top*2)+"px");
+    j("#superMenu").css("left",(e.pageX-top)+"px");
+    j('#superMenu li h7').html(nomePaciente);
+    		
+	});
+}
+
+function enviaWpp(uid){
+
+  var telefone = j(".telefone-"+uid).html();
+  
+  telefone = telefone.replace(/[^0-9\s]/gi, '').replace(/[_\s]/g, '');
+
+  window.open("https://web.whatsapp.com/send?phone=+55"+telefone);
 
 }
 

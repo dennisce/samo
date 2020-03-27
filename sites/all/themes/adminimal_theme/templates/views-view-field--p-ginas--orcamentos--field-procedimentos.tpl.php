@@ -23,10 +23,13 @@
  */
     $total = 0.00;
     $procedimentos = explode(',',$output);
-    foreach($procedimentos as $k=>$v){
-        $proc = node_load($v);
-        $total += floatval($proc->field_valor['und'][0]['value']);
+    if(isset($procedimentos[1])){
+        foreach($procedimentos as $k=>$v){
+            $proc = node_load($v);
+            $total += floatval($proc->field_valor['und'][0]['value']);
+        }
     }
+    
     global $base_url;
 ?>
     <a href="<?=$base_url?>/node/<?=$row->nid?>">R$ <?php print number_format($total,2,',','.'); ?></a>

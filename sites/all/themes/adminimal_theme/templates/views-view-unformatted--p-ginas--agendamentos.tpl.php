@@ -41,9 +41,6 @@ if(count($uid)==0 || $uid[1] == 'ALL'){
   ";
   
 }
-
-drupal_add_js(path_to_theme().'/js/utils.js');
-
 ?>
 <link href='<?=$lib?>/core/all.css' rel='stylesheet'>
 <link href='<?=$lib?>/core/main.css' rel='stylesheet' />

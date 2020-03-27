@@ -19,7 +19,22 @@
  *
  * @ingroup views_templates
  */
+$q = explode('/',$_GET['q']);
+$q = (isset($q[1])?$q[1]:FALSE);
+$paciente = ($q)?user_load($q):$q;
 ?>
+<?php if ($paciente) : ?>
+  <fieldset class="dados view-display-id-block_pacientes">
+    <legend>Dados do Paciente</legend>
+    <div class="views-field-field-nome-completo">
+      <sup><b>Paciente:</b></sup>
+      <h1 class="views-row field-content uid-<?=$paciente->uid?>"><?=$paciente->field_nome_completo['und'][0]['value']?> (<?=$paciente->uid?>)</h1>
+      <div class="views-field-field-telefone">
+        <div class="field-content telefone-<?=$paciente->uid?>"><?=$paciente->field_telefone['und'][0]['value']?></div>
+      </div>
+    </div>
+  </fieldset>
+<?php endif; ?>
 <table <?php if ($classes): ?> class="<?php print $classes; ?>"<?php endif ?><?php print $attributes; ?>>
    <?php if (!empty($title) || !empty($caption)): ?>
      <caption><?php print $caption . $title; ?></caption>

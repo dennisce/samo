@@ -63,8 +63,15 @@ $paciente = user_load($pid[1]);
       });
     });
 </script>
-<fieldset>
-  <legend><?=$paciente->field_nome_completo['und'][0]['safe_value']?> (<?=$paciente->uid?>)</legend>
+<fieldset class="dados view-display-id-block_pacientes">
+<legend>Dados do Paciente</legend>
+  <div class="views-field-field-nome-completo">
+    <sup><b>Paciente:</b></sup>
+    <h1 class="views-row field-content uid-<?=$paciente->uid?>"><?=$paciente->field_nome_completo['und'][0]['value']?> (<?=$paciente->uid?>)</h1>
+    <div class="views-field-field-telefone">
+      <div class="field-content telefone-<?=$paciente->uid?>"><?=$paciente->field_telefone['und'][0]['value']?></div>
+    </div>
+  </div>
 
   <div class="card" id="pago">
     <span class="cardTitle">PAGO</span>

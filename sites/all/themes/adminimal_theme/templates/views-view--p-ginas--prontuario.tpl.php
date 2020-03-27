@@ -1,5 +1,6 @@
 <?php
   global $base_url;
+
   $q = 0;
   $agendamento = 0;
   $paciente = 0;
@@ -28,7 +29,6 @@
   } else {
     $dadosTitle = ' do Paciente';
   }
-
 ?>
 <script type="text/javascript">
 var j = jQuery.noConflict();
@@ -40,9 +40,15 @@ function show(alvo){
 
 
 </script>
-  <fieldset class="dados">
+  <fieldset class="dados view-display-id-block_pacientes">
     <legend>Dados<?=$dadosTitle?></legend>
-    <sup><b>Paciente:</b></sup><h1><?=$paciente->field_nome_completo['und'][0]['value']?></h1>
+    <div class="views-field-field-nome-completo">
+      <sup><b>Paciente:</b></sup>
+      <h1 class="views-row field-content uid-<?=$paciente->uid?>"><?=$paciente->field_nome_completo['und'][0]['value']?> (<?=$paciente->uid?>)</h1>
+      <div class="views-field-field-telefone">
+        <div class="field-content telefone-<?=$paciente->uid?>"><?=$paciente->field_telefone['und'][0]['value']?></div>
+      </div>
+    </div>
 <?php if(isset($agendamento->field_procedimentos['und'])){ ?>
     <?php foreach($agendamento->field_procedimentos['und'] as $k=>$v){ ?>
         <?php $procedimento = node_load($v['target_id']); ?>
