@@ -393,7 +393,7 @@ function getEventosByProfissional(){
     $_GET['uid'] = $user->uid;
 
   }
-
+ 
   $dtInicial = str_replace("T"," ",$_GET['start']);
   $dtFinal = str_replace("T"," ",$_GET['end']);
   $uid = $_GET['uid'];
