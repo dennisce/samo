@@ -52,24 +52,8 @@ if(isset($_GET['field_data_value'])){
             style: 'decimal',
             currency: 'GBP',
             minimumFractionDigits: 2,
-        }).format(number);
-        // j('#saldo .valor').html("<b>R$ " + reais + "</b>");
-        let situacao = (number < 0)?"debito":"credito";
-        // j('#saldo .valor').addClass(situacao);
-
-        reais = new Intl.NumberFormat('pt-BR', {
-            style: 'decimal',
-            currency: 'GBP',
-            minimumFractionDigits: 2,
         }).format(saldo[0].totalExecutado);
         j('#executado .valor').html("R$ " + reais);
-        
-        reais = new Intl.NumberFormat('pt-BR', {
-            style: 'decimal',
-            currency: 'GBP',
-            minimumFractionDigits: 2,
-        }).format(saldo[0].totalPago);
-        j('#pago .valor').html("R$ " + reais);
 
       });
     });

@@ -37,7 +37,9 @@ function show(alvo){
   j("."+alvo).toggle();
 }
 
-
+j(document).ready(function(){
+  j("form").attr("target","_self");
+});
 
 </script>
   <fieldset class="dados view-display-id-block_pacientes">
@@ -62,7 +64,7 @@ function show(alvo){
   <?php  }  ?>
   </fieldset>
 <?php if($agendamentoNid && $dataAgendamento == $hoje){ ?>
-  <form action="<?=$base_url?>/salvarProntuario" method="POST" class="node-form">
+  <form action="<?=$base_url?>/salvarProntuario" method="POST" class="node-form" target="_self">
     <div class="form-item form-type-textarea body">
       <label for="body">Ficha clínica </label>
     <div class="form-textarea-wrapper resizable textarea-processed resizable-textarea">

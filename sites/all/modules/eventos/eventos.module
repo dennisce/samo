@@ -664,9 +664,9 @@ function getSaldo(){
       $end = $_GET['end'];
       $sql .= "
       AND
-        d.field_data_value > '$start'
+        d.field_data_value >= '$start'
       AND 
-        d.field_data_value2 < '$end'
+        d.field_data_value2 <= '$end'
       AND
         p.field_profissional_target_id = $uid
       
