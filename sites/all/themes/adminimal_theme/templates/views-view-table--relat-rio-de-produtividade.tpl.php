@@ -34,7 +34,14 @@ if(isset($_GET['field_data_value'])){
 
   $e = explode('/',$_GET['field_data_value']['max']['date']);
   $end = rawurlencode($e[2].'-'.$e[1].'-'.$e[0])." 23:59:59";
-}
+
+  /*Link para impressão*/
+  $start = $_GET['field_data_value']['min']['date'];
+  $end = $_GET['field_data_value']['max']['date'];
+  $produtividade = rawurlencode("?field_data_value[min][date]=$start&field_data_value[max][date]=$end");
+  $link = $_GET['q'].$produtividade;
+} 
+
 
 ?>
 <script>
@@ -59,7 +66,12 @@ if(isset($_GET['field_data_value'])){
     });
 </script>
 <fieldset class="dados view-display-id-block_pacientes">
-<legend><?=$profissional->field_nome_completo['und'][0]['value']?> (<?=$profissional->uid?>)</legend>
+  <legend><?=$profissional->field_nome_completo['und'][0]['value']?> (<?=$profissional->uid?>)</legend>
+  <?php if(!isset($_GET['p'])){ ?>
+    <div id="print">
+      <a href="<?=$base_url?>/print/<?=$link?>?p=true" target="_blank"><img src="<?=$base_url?>/sites/all/themes/adminimal_theme/icons/print.png" /></a>
+    </div>
+  <?php } ?>
   <div class="card" id="periodo">
     <span class="cardTitle">PERÍODO</span>
     <sup class="cardSubTitle">Período considerado para o relatório</sup>

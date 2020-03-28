@@ -12,11 +12,10 @@ $lib = $base_url."/".libraries_get_path('calendarUtil');
 $uid = Array();
 $uid = explode("/", $_GET['q']);
 
-// if(isset($uid[2]) && $uid[0] == 'agendas'){
-//   header("Location: ".$base_url."/"."agendas/".$uid[1]."#overlay=admin/create/agendamento/".$uid[2]."/".$uid[1]);
-// } else {
-//   //print_r($uid);
-// }
+/*Cria URL para produtividade*/
+$start = date('d/m/Y');
+$end = date('d/m/Y');
+$produtividade = "?".rawurlencode("field_data_value[min][date]=$start&field_data_value[max][date]=$end");
 
 $urlSrv = (count($uid)==0 || $uid[1] == 'ALL')?$base_url."/calendar/getEventos":$base_url."/calendar/getEventosByProfissional?uid=".$uid[1];
 
@@ -81,10 +80,16 @@ if(count($uid)==0 || $uid[1] == 'ALL'){
           click: function() {
             calendar.refetchEvents();
           }
-        }
+        },
+        produtividade: {
+          text: 'Produtividade',
+          click: function() {
+            location.href = '#overlay=/produtividade/<?=$uid[1].$produtividade?>';
+          }
+        },
       },
       footer:{
-        center: 'refresh'
+        center: 'refresh,produtividade'
       },
       defaultDate: Date.now(),
       navLinks: true, 
