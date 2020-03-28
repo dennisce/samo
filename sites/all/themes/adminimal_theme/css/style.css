@@ -3614,7 +3614,8 @@ div.field-container table .footer td{
   float: left;
 }
 
-.view-relat-rio-de-produtividade #edit-field-data-value-wrapper .views-widget .container-inline-date .form-item label{
+#edit-field-data-value-max,
+#edit-field-data-value-min{
   width: 100%;
   margin: 0;
   padding: 0;
