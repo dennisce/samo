@@ -33,7 +33,7 @@ if(isset($_GET['field_data_value'])){
   $start = rawurlencode($s[2].'-'.$s[1].'-'.$s[0])." 00:00:00";
 
   $e = explode('/',$_GET['field_data_value']['max']['date']);
-  $end = rawurlencode($e[2].'-'.$e[1].'-'.$e[0])." 00:00:00";
+  $end = rawurlencode($e[2].'-'.$e[1].'-'.$e[0])." 23:59:59";
 }
 
 ?>
