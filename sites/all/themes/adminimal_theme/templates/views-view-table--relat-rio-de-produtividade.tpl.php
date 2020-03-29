@@ -39,7 +39,7 @@ if(isset($view->exposed_data)){
   $startURL = rawurlencode($s[2].'/'.$s[1].'/'.$s[0]);
   $e = explode('-',$view->exposed_data['field_data_value']['max']);
   $endURL = rawurlencode($e[2].'/'.$e[1].'/'.$e[0]);
-
+ 
   $produtividade = "?p=true&".rawurlencode("field_data_value[min][date]")."=$startURL &".rawurlencode("field_data_value[max][date]")."=$endURL";
   $link = $_GET['q'].$produtividade;
 
