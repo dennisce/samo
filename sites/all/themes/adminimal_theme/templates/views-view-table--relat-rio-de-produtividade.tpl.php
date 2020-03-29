@@ -29,9 +29,6 @@ if(!isset($uid[1])){
 //print_r($view->exposed_data); die();
 $profissional = user_load($uid[1]);
 
-$view->exposed_data['field_data_value']['min'] = ($view->exposed_data['field_data_value']['min'] == '')? date('Y-m-d') : $view->exposed_data['field_data_value']['min'];
-$view->exposed_data['field_data_value']['max'] = ($view->exposed_data['field_data_value']['max'] == '')? date('Y-m-d') : $view->exposed_data['field_data_value']['max'];
-
   $start = $view->exposed_data['field_data_value']['min']." 00:00:00";
   $end = $view->exposed_data['field_data_value']['max']." 23:59:59";
 
@@ -44,9 +41,6 @@ $view->exposed_data['field_data_value']['max'] = ($view->exposed_data['field_dat
   $produtividade = "?p=true&".rawurlencode("field_data_value[min][date]")."=$startURL &".rawurlencode("field_data_value[max][date]")."=$endURL";
   $link = $_GET['q'].$produtividade;
 
-	if(!isset($_GET['field_data_value'])){
-		header("Location: $produtividade");
-	}
 ?>
 <script>
   var j = jQuery.noConflict();
