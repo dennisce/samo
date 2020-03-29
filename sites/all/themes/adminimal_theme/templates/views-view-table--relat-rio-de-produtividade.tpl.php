@@ -25,11 +25,11 @@ $uid = explode('/',$_GET['q']);
 if(!isset($uid[1])){
   $uid[1] = "ALL";
 }
-//echo "<pre>";
-//print_r($view->exposed_data); die();
+echo "<pre>";
+print_r($view->exposed_data); die();
 $profissional = user_load($uid[1]);
 
-if(isset($view->exposed_data)){
+if(isset($view->exposed_data['field_data_value']['min'])){
 
   $start = $view->exposed_data['field_data_value']['min']." 00:00:00";
   $end = $view->exposed_data['field_data_value']['max']." 23:59:59";
