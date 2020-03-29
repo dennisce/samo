@@ -3,7 +3,10 @@
 	
 	$view->exposed_data['field_data_value']['min'] = ($view->exposed_data['field_data_value']['min'] == '')? date('Y-m-d') : $view->exposed_data['field_data_value']['min'];
 	$view->exposed_data['field_data_value']['max'] = ($view->exposed_data['field_data_value']['max'] == '')? date('Y-m-d') : $view->exposed_data['field_data_value']['max'];
-
+	
+	echo "<pre>";
+	print_r($view->exposed_data);
+	
 ?>
 <script type="text/javascript">
 var j = jQuery.noConflict();
