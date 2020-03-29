@@ -13,9 +13,10 @@ $uid = Array();
 $uid = explode("/", $_GET['q']);
 
 /*Cria URL para produtividade*/
-$start = date('d/m/Y');
-$end = date('d/m/Y');
-$produtividade = "?".rawurlencode("field_data_value[min][date]=$start&field_data_value[max][date]=$end");
+$startURL = date('d/m/Y');
+$endURL = date('d/m/Y');
+
+$produtividade = "?".rawurlencode("field_data_value[min][date]")."=".rawurlencode("$startURL")."&".rawurlencode("field_data_value[max][date]")."=".rawurlencode("$endURL");
 
 $urlSrv = (count($uid)==0 || $uid[1] == 'ALL')?$base_url."/calendar/getEventos":$base_url."/calendar/getEventosByProfissional?uid=".$uid[1];
 
@@ -84,7 +85,7 @@ if(count($uid)==0 || $uid[1] == 'ALL'){
         produtividade: {
           text: 'Produtividade',
           click: function() {
-            location.href = '#overlay=/produtividade/<?=$uid[1].$produtividade?>';
+            location.href = '#overlay=produtividade/<?=$uid[1]?>';
           }
         },
       },

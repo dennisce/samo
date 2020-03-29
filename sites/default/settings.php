@@ -250,8 +250,8 @@ $databases = array (
     'default' => 
     array (
       'database' => 'samo',
-      'username' => 'samo',
-      'password' => 'senha',
+      'username' => 'root',
+      'password' => '',
       'host' => 'localhost',
       'port' => '',
       'driver' => 'mysql',

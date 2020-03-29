@@ -25,23 +25,24 @@ $uid = explode('/',$_GET['q']);
 if(!isset($uid[1])){
   $uid[1] = "ALL";
 }
-
+//echo "<pre>";
+//print_r($view->exposed_data);
 $profissional = user_load($uid[1]);
-
-if(isset($_GET['field_data_value'])){
-  $s = explode('/',$_GET['field_data_value']['min']['date']);
+// %3Ffield_data_value%5Bmin%5D%5Bdate%5D%3D01%2F03%2F2020%26field_data_value%5Bmax%5D%5Bdate%5D%3D02%2F03%2F2020?p=true
+// ?  field_data_value%5Bmin%5D%5Bdate%5D=01%2F03%2F2020&field_data_value%5Bmax%5D%5Bdate%5D=02%2F03%2F2020
+if(isset($view->exposed_data)){
+  $s = explode('/',$view->exposed_data['field_data_value']['min']['date']);
   $start = rawurlencode($s[2].'-'.$s[1].'-'.$s[0])." 00:00:00";
 
-  $e = explode('/',$_GET['field_data_value']['max']['date']);
+  $e = explode('/',$view->exposed_data['max']['date']);
   $end = rawurlencode($e[2].'-'.$e[1].'-'.$e[0])." 23:59:59";
 
   /*Link para impressão*/
-  $start = $_GET['field_data_value']['min']['date'];
-  $end = $_GET['field_data_value']['max']['date'];
-  $produtividade = rawurlencode("?field_data_value[min][date]=$start&field_data_value[max][date]=$end");
+  $startURL = $view->exposed_data['min']['date'];
+  $endURL = $view->exposed_data['max']['date'];
+  //$produtividade = "?field_data_value[min][date]=$start&field_data_value[max][date]=$end";
+  $produtividade = "?p=true&".rawurlencode("field_data_value[min][date]")."=".rawurlencode("$startURL")."&".rawurlencode("field_data_value[max][date]")."=".rawurlencode("$endURL");
   $link = $_GET['q'].$produtividade;
-} 
-
 
 ?>
 <script>
@@ -69,7 +70,7 @@ if(isset($_GET['field_data_value'])){
   <legend><?=$profissional->field_nome_completo['und'][0]['value']?> (<?=$profissional->uid?>)</legend>
   <?php if(!isset($_GET['p'])){ ?>
     <div id="print">
-      <a href="<?=$base_url?>/print/<?=$link?>?p=true" target="_blank"><img src="<?=$base_url?>/sites/all/themes/adminimal_theme/icons/print.png" /></a>
+      <a href="<?=$base_url?>/print/<?=$link?>" target="_blank"><img src="<?=$base_url?>/sites/all/themes/adminimal_theme/icons/print.png" /></a>
     </div>
   <?php } ?>
   <div class="card" id="periodo">
@@ -117,3 +118,7 @@ if(isset($_GET['field_data_value'])){
     </tbody>
   </table>
 </fieldset>
+<?php } else { ?>
+	<h2>Selecione o período para calcular a produtividade</h2>
+<?php } ?>
+
