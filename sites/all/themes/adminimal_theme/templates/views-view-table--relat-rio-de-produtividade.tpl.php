@@ -29,7 +29,8 @@ if(!isset($uid[1])){
 //print_r($view->exposed_data); die();
 $profissional = user_load($uid[1]);
 
-if(isset($view->exposed_data['field_data_value']['min'])){
+$view->exposed_data['field_data_value']['min'] = ($view->exposed_data['field_data_value']['min'] == '')? date('Y-m-d') : $view->exposed_data['field_data_value']['min'];
+$view->exposed_data['field_data_value']['max'] = ($view->exposed_data['field_data_value']['max'] == '')? date('Y-m-d') : $view->exposed_data['field_data_value']['max'];
 
   $start = $view->exposed_data['field_data_value']['min']." 00:00:00";
   $end = $view->exposed_data['field_data_value']['max']." 23:59:59";
@@ -117,7 +118,3 @@ if(isset($view->exposed_data['field_data_value']['min'])){
     </tbody>
   </table>
 </fieldset>
-<?php } else { ?>
-	<h2>Selecione o período para calcular a produtividade</h2>
-<?php } ?>
-
