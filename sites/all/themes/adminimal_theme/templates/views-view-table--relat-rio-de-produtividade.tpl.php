@@ -44,6 +44,9 @@ $view->exposed_data['field_data_value']['max'] = ($view->exposed_data['field_dat
   $produtividade = "?p=true&".rawurlencode("field_data_value[min][date]")."=$startURL &".rawurlencode("field_data_value[max][date]")."=$endURL";
   $link = $_GET['q'].$produtividade;
 
+	if(!isset($_GET['field_data_value'])){
+		header("Location: $link",TRUE);
+	}
 ?>
 <script>
   var j = jQuery.noConflict();
