@@ -76,7 +76,7 @@ if(isset($view->exposed_data)){
     <span class="cardTitle">PERÍODO</span>
     <sup class="cardSubTitle">Período considerado para o relatório</sup>
     <div class="periodo valor">
-      <?=$_GET['field_data_value']['min']['date']?> a <?=$_GET['field_data_value']['max']['date']?>
+      <?=rawurldecode($startURL)?> a <?=rawurldecode($endURL)?>
     </div>
   </div>
   <div class="card" id="executado">
