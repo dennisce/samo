@@ -45,7 +45,7 @@ $view->exposed_data['field_data_value']['max'] = ($view->exposed_data['field_dat
   $link = $_GET['q'].$produtividade;
 
 	if(!isset($_GET['field_data_value'])){
-		header("Location: /$link",FALSE);
+		header("Location: /$link",TRUE);
 	}
 ?>
 <script>
