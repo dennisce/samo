@@ -8,3 +8,4 @@ sites/*/private
 
 # Ignore al this files
 .DS_Store
+.gitignore
