@@ -674,7 +674,7 @@ function getSaldo(){
       
       ";
     }
-    
+    //debugFake($sql);
   } else {
     die(0.00);
   }

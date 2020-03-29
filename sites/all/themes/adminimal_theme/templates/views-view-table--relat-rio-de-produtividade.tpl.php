@@ -26,22 +26,21 @@ if(!isset($uid[1])){
   $uid[1] = "ALL";
 }
 //echo "<pre>";
-//print_r($view->exposed_data);
+//print_r($view->exposed_data); die();
 $profissional = user_load($uid[1]);
-// %3Ffield_data_value%5Bmin%5D%5Bdate%5D%3D01%2F03%2F2020%26field_data_value%5Bmax%5D%5Bdate%5D%3D02%2F03%2F2020?p=true
-// ?  field_data_value%5Bmin%5D%5Bdate%5D=01%2F03%2F2020&field_data_value%5Bmax%5D%5Bdate%5D=02%2F03%2F2020
-if(isset($view->exposed_data)){
-  $s = explode('/',$view->exposed_data['field_data_value']['min']['date']);
-  $start = rawurlencode($s[2].'-'.$s[1].'-'.$s[0])." 00:00:00";
 
-  $e = explode('/',$view->exposed_data['max']['date']);
-  $end = rawurlencode($e[2].'-'.$e[1].'-'.$e[0])." 23:59:59";
+if(isset($view->exposed_data)){
+
+  $start = $view->exposed_data['field_data_value']['min']." 00:00:00";
+  $end = $view->exposed_data['field_data_value']['max']." 23:59:59";
 
   /*Link para impressão*/
-  $startURL = $view->exposed_data['min']['date'];
-  $endURL = $view->exposed_data['max']['date'];
-  //$produtividade = "?field_data_value[min][date]=$start&field_data_value[max][date]=$end";
-  $produtividade = "?p=true&".rawurlencode("field_data_value[min][date]")."=".rawurlencode("$startURL")."&".rawurlencode("field_data_value[max][date]")."=".rawurlencode("$endURL");
+  $s = explode('-',$view->exposed_data['field_data_value']['min']);
+  $startURL = rawurlencode($s[2].'/'.$s[1].'/'.$s[0]);
+  $e = explode('-',$view->exposed_data['field_data_value']['max']);
+  $endURL = rawurlencode($e[2].'/'.$e[1].'/'.$e[0]);
+
+  $produtividade = "?p=true&".rawurlencode("field_data_value[min][date]")."=$startURL &".rawurlencode("field_data_value[max][date]")."=$endURL";
   $link = $_GET['q'].$produtividade;
 
 ?>
