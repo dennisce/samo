@@ -43,7 +43,7 @@ $q = explode('/',$_GET['q']);
 $agendamentoId                    = '';
 $agendamento                      = '';
 $agendamentoStatusValue           = '';
-$agendamentotipoAgendamentoValues = [];
+$agendamentotipoAgendamentoValues = [0];
 $agendamentoData                  = '';
 $agendamentoHora                  = '';
 if(isset($user->roles[4]) && !isset($user->roles[3])){
@@ -58,7 +58,8 @@ if($q[count($q)-3] != 'agendamento'){
   $agendamentoId                    = $q[count($q)-3];
   $agendamento                      = node_load($agendamentoId);
   $agendamentoStatusValue           = $agendamento->field_status['und'][0]['value'];
-  foreach($agendamento->field_tipo_de_agendamento['und'] as $k=>$v){
+  $agendamentotipoAgendamentoValues = [];
+foreach($agendamento->field_tipo_de_agendamento['und'] as $k=>$v){
     $agendamentotipoAgendamentoValues[] = $v['value']; 
   }
   $dataHora = explode(' ',$agendamento->field_data['und'][0]['value']);
@@ -289,7 +290,7 @@ j(document).ready(function(){
   <legend>Tipo do agendamento</legend>
     <?php foreach($tipoAgendamentoValues as $k=>$v){ ?>
     <?php $checked = (in_array($k,$agendamentotipoAgendamentoValues))?'checked':''; ?>
-    <input value='<?=$k?>' type='checkbox' name='field_tipo_de_agendamento[]' <?=$checked?>><label for='field_tipo_de_agendamento[]'><?=$v?></label>
+      <label><input value='<?=$k?>' type='checkbox' name='field_tipo_de_agendamento[]' <?=$checked?>><?=$v?></label>
     <?php } ?>
   </fieldset>
 
