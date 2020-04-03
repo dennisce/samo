@@ -1373,9 +1373,11 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
         }
         if (is_array($elements['#value'])) {
           $value = in_array($elements['#type'], array('checkboxes', 'tableselect')) ? array_keys($elements['#value']) : $elements['#value'];
+              // print_r($value);die();
           foreach ($value as $v) {
             if (!isset($options[$v])) {
               form_error($elements, $t('An illegal choice has been detected. Please contact the site administrator.'));
+              // print_r($v);
               watchdog('form', 'Illegal choice %choice in !name element.', array('%choice' => $v, '!name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title']), WATCHDOG_ERROR);
             }
           }
