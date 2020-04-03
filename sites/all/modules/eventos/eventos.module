@@ -78,6 +78,7 @@ function eventos_menu() {
 function importProcedimento(){
   // $p = node_load(99);
   // debugFake($p);
+  /*
   $p = new stdClass();$p->uid = 1;$p->language = 'pt-br';$p->status = 1;$p->field_categoria['und'][0]['tid'] = 1;$p->type = "procedimento";$p->title = "Aparelho de Contenção Final - Arcada Inferior";	$p->field_valor['und'][0]['value'] = 	100.00;$n = node_submit($p);$salvo = node_save($n);
   $p = new stdClass();$p->uid = 1;$p->language = 'pt-br';$p->status = 1;$p->field_categoria['und'][0]['tid'] = 1;$p->type = "procedimento";$p->title = "Aparelho de Contenção Final - Arcada Superior";	$p->field_valor['und'][0]['value'] = 	100.00;$n = node_submit($p);$salvo = node_save($n);
   $p = new stdClass();$p->uid = 1;$p->language = 'pt-br';$p->status = 1;$p->field_categoria['und'][0]['tid'] = 1;$p->type = "procedimento";$p->title = "Aparelho de Protrusão Mandibular/Bionator";	$p->field_valor['und'][0]['value'] = 	150.00;$n = node_submit($p);$salvo = node_save($n);
@@ -357,7 +358,7 @@ function importProcedimento(){
   $p = new stdClass();$p->uid = 1;$p->language = 'pt-br';$p->status = 1;$p->field_categoria['und'][0]['tid'] = 1;$p->type = "procedimento";$p->title = "Tratamento cirúrgico para tumores odontogênicos benignos - sem reconstrução";	$p->field_valor['und'][0]['value'] = 	470.00;$n = node_submit($p);$salvo = node_save($n);
   $p = new stdClass();$p->uid = 1;$p->language = 'pt-br';$p->status = 1;$p->field_categoria['und'][0]['tid'] = 1;$p->type = "procedimento";$p->title = "Ulectomia";	$p->field_valor['und'][0]['value'] = 	70.00;$n = node_submit($p);$salvo = node_save($n);
   $p = new stdClass();$p->uid = 1;$p->language = 'pt-br';$p->status = 1;$p->field_categoria['und'][0]['tid'] = 1;$p->type = "procedimento";$p->title = "Ulotomia";	$p->field_valor['und'][0]['value'] = 	60.00;$n = node_submit($p);$salvo = node_save($n);
-  
+  */
   // $n = node_submit($p);
   // $salvo = node_save($n);
 
