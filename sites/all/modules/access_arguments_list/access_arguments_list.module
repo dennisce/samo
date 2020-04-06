@@ -1,0 +1,34 @@
+<?php
+
+/**
+ * @file
+ * This module adds the "access asgument" parameter to each permission.
+ *
+ * Permission row in admin permissions page (admin/people/permissions).
+ *  */
+
+/**
+ * Implements hook_help().
+ */
+function access_arguments_list_help($path, $arg) {
+  $output = file_get_contents(drupal_get_path('module', 'access_arguments_list') . '/README.md');
+  switch ($path) {
+    case "admin/help#access_arguments_list":
+      return '<pre>' . $output . '</pre>';
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function access_arguments_list_form_user_admin_permissions_alter(&$form, $form_state, $form_id) {
+  $permissions = $form['permission'];
+  foreach ($permissions as $aal => $one_permission) {
+    if (array_key_exists('#type', $one_permission) and $one_permission['#type'] == 'item') {
+      $item_id = str_replace(' ', '_', $aal);
+      $form['permission'][$aal]['#description'] .= "<div id='" . $item_id . "' class='access_arguments_item'>" . t('<i>Access Argument: </i><strong>@permission_name</strong>', array(
+        '@permission_name' => $aal,
+      )) . "</div>";
+    }
+  }
+}

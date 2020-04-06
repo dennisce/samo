@@ -50,7 +50,7 @@ $lib = libraries_get_path('calendarUtil');
       editable: true,
       eventLimit: false, // allow "more" link when too many events
       
-      events: "calendar/getEventos",
+      events: "admin/calendar/getEventos",
     });
 
     calendar.render();

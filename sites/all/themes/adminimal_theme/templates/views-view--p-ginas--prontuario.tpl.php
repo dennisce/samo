@@ -64,7 +64,7 @@ j(document).ready(function(){
   <?php  }  ?>
   </fieldset>
 <?php if($agendamentoNid && $dataAgendamento == $hoje){ ?>
-  <form action="<?=$base_url?>/salvarProntuario" method="POST" class="node-form" target="_self">
+  <form action="<?=$base_url?>/admin/salvarProntuario" method="POST" class="node-form" target="_self">
     <div class="form-item form-type-textarea body">
       <label for="body">Ficha clínica </label>
     <div class="form-textarea-wrapper resizable textarea-processed resizable-textarea">

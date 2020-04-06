@@ -42,7 +42,7 @@ $lib = libraries_get_path('calendarUtil');
     });
 
     calendar.render();
-    j.get( "calendar/getEventos", function(data) {
+    j.get( "admin/calendar/getEventos", function(data) {
       var ret = JSON.parse(data);
       console.log(ret);
       ret.forEach(function(evt){

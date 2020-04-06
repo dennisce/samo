@@ -32,7 +32,7 @@ $paciente = user_load($pid[1]);
     j(document).ready(function(){
 
       //Pegar os valores do saldo TOTAL
-      j.get("<?=$base_url?>/getSaldo?pid=<?=$pid[1]?>", function(ret){
+      j.get("<?=$base_url?>/admin/getSaldo?pid=<?=$pid[1]?>", function(ret){
 
         var saldo = JSON.parse(ret);
 

@@ -118,7 +118,7 @@ j(document).ready(function(){
       controller: {
         loadData: function(filter) {
           return j.ajax({
-            url: "<?=$base_url?>/getProcedimentos?nid=<?=$agendamentoId?>",
+            url: "<?=$base_url?>/admin/getProcedimentos?nid=<?=$agendamentoId?>",
             dataType: "json"
           });
         }
@@ -189,7 +189,7 @@ j(document).ready(function(){
       controller: {
         loadData: function(row) {
           return j.ajax({
-            url: "<?=$base_url?>/getPagamentos?nid=<?=$agendamentoId?>",
+            url: "<?=$base_url?>/admin/getPagamentos?nid=<?=$agendamentoId?>",
             dataType: "json"
           });
         }

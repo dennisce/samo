@@ -51,7 +51,7 @@ $profissional = user_load($uid[1]);
     j(document).ready(function(){
 
       //Pegar os valores do saldo TOTAL
-      j.get("<?=$base_url?>/getSaldo?uid=<?=$uid[1]?>&start=<?=$start?>&end=<?=$end?>", function(ret){
+      j.get("<?=$base_url?>/admin/getSaldo?uid=<?=$uid[1]?>&start=<?=$start?>&end=<?=$end?>", function(ret){
 
         var saldo = JSON.parse(ret);
 

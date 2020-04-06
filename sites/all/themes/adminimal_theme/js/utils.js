@@ -86,7 +86,7 @@ function addComportamento(base_url, ui, local){
         ui.item.value.lastIndexOf("(") + 1, 
         ui.item.value.lastIndexOf(")")
       );
-    j.get(base_url+'/getDadosProcedimentos?nid='+nid, function(data){
+    j.get(base_url+'/admin/getDadosProcedimentos?nid='+nid, function(data){
       let d = JSON.parse(data);
       j('#jsGridProcedimentos .jsgrid-grid-'+local+' td.valor input').val(d.field_valor.und[0].value);
       j('#jsGridProcedimentos .jsgrid-grid-'+local+' td.idGrid input').val(d.nid);
@@ -222,7 +222,7 @@ function formatDate(date) {
 }
 function calculaSaldoTotal(base_url,pid){
   //Pegar os valores do saldo TOTAL
-  j.get(base_url+"/getSaldo?pid="+pid, function(ret){
+  j.get(base_url+"/admin/getSaldo?pid="+pid, function(ret){
 
     var saldo = JSON.parse(ret);
 

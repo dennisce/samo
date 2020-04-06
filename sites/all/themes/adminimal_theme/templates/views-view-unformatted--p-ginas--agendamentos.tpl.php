@@ -17,11 +17,14 @@ $startURL = date('d/m/Y');
 $endURL = date('d/m/Y');
 
 $produtividade = "?".rawurlencode("field_data_value[min][date]")."=".rawurlencode("$startURL")."&".rawurlencode("field_data_value[max][date]")."=".rawurlencode("$endURL");
+$urlSrv = (count($uid)==0 || $uid[1] == 'ALL')?$base_url."/admin/calendar/getEventos":$base_url."/admin/calendar/getEventosByProfissional?uid=".$uid[1];
 
-$urlSrv = (count($uid)==0 || $uid[1] == 'ALL')?$base_url."/calendar/getEventos":$base_url."/calendar/getEventosByProfissional?uid=".$uid[1];
 
 if(count($uid)==0 || $uid[1] == 'ALL'){
   $businessHours = "";
+  $btoProdutividade = '';
+  global $user;
+
 } else {
   $user = user_load($uid[1]);  
   
@@ -85,12 +88,13 @@ if(count($uid)==0 || $uid[1] == 'ALL'){
         produtividade: {
           text: 'Produtividade',
           click: function() {
-            location.href = '#overlay=produtividade/<?=$uid[1]?>';
+            location.href = '#overlay=produtividade/<?=$user->uid?>';
           }
         },
       },
       footer:{
-        center: 'refresh,produtividade'
+        left:'produtividade',
+        center: 'refresh'
       },
       defaultDate: Date.now(),
       navLinks: true, 
@@ -133,7 +137,7 @@ if(count($uid)==0 || $uid[1] == 'ALL'){
       end   : fim,
       id    : evt.event.id
       };
-    j.post("<?=$base_url?>/calendar/alterEvento", evento, function(ret){
+    j.post("<?=$base_url?>/admin/calendar/alterEvento", evento, function(ret){
 
         console.log(ret);
         

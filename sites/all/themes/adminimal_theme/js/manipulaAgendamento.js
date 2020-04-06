@@ -52,7 +52,7 @@ function manipulaAgendamento(base_url,row,action){
     }
 
     //Envia para salvar o node AGENDAMENTO
-    j.post(base_url+"/manipulaAgendamento", Object.assign({},agendamento), function(ret){
+    j.post(base_url+"/admin/manipulaAgendamento", Object.assign({},agendamento), function(ret){
 
         j('#idAgendamento').val(ret);
         if(action == 'bto'){
