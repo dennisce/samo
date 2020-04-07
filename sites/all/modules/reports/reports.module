@@ -1,0 +1,30 @@
+<?php
+
+function reports_menu() {
+
+  $items = array();
+
+  $items['admin/relatorio/%/agendamentos'] = array(
+    // 'delivery callback' => 'agendamentos',
+    'title callback' => 'Relatório',
+    'page callback' => 'agendamentosCallback', 
+    'page arguments' => array(2),
+    'access arguments' => array('access content')
+  );
+
+  return $items;
+  
+}
+
+function agendamentos($teste){
+  echo "<pre>";
+  print_r($teste);
+  die();
+}
+
+function agendamentosCallback($teste){
+
+  $html = "";
+
+  print theme('update_page', $html);
+}
