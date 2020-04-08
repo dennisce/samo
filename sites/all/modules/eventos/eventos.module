@@ -1,5 +1,7 @@
 <?php
 
+define("API_KEY","Q_1RFryRrTTj_aZ69x75HA");
+
 function eventos_menu() {
 
   $items = array();
@@ -111,10 +113,8 @@ function salvarProntuario(){
 
 function manipulaAgendamento(){
   
-  // $a = node_load(63);
-  // echo "<pre>";
-  // print_r($a);
-  // die();
+  $h = getallheaders();
+  debugFake($_SERVER);
 
   $agendamento = node_load($_POST['ID']);
   // Dados iniciais caso não exista agendamento passado como parametro
