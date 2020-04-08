@@ -24,7 +24,15 @@
     
     global $base_url;
     $pid = explode('/',$_GET['q']);
-    $extrato = json_decode(file_get_contents($base_url."/admin/getSaldo?pid=".$pid[1]."&nid=".$output));
+    $opts = array(
+    'http'=>array(
+        'method'=>"GET",
+        'header'=>"api-key:".API_KEY
+    )
+    );
+    
+    $context = stream_context_create($opts);
+    $extrato = json_decode(file_get_contents($base_url."/admin/getSaldo?pid=".$pid[1]."&nid=".$output,false,$context));
     $saldo = floatval($extrato[0]->totalPago - $extrato[0]->totalExecutado);
     $linha = $row->_field_data['nid']['entity'];
 ?>

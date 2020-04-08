@@ -4,11 +4,10 @@ define("API_KEY","jTauG01zBT_BLiZCaJ9JEg");
 function api_key(){
   $h = getallheaders();
   $api_key = '';
+  // debugFake($h);
   if(
     strpos($_SERVER['HTTP_REFERER'],'localhost') || 
-    strpos($_SERVER['HTTP_REFERER'],'nesaude.com') || 
-    strpos($_SERVER['HTTP_HOST'],'nesaude.com') || 
-    strpos($_SERVER['HTTP_HOST'],'ocalhost')){
+    strpos($_SERVER['HTTP_REFERER'],'nesaude.com')){
     $api_key = API_KEY;
   } else {
       $api_key = $h['api-key'];
