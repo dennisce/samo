@@ -399,7 +399,7 @@ function _node_resource_update($nid, $node) {
   // Adds backwards compatability with regression fixed in #1083242
   $node = _services_arg_value($node, 'node');
   
-  print_r($node); die();
+  // print_r($node); die();
 
   $node['nid'] = $nid;
 
