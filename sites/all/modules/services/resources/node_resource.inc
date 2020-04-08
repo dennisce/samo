@@ -44,19 +44,20 @@ function _node_resource_definition() {
           'callback' => '_node_resource_update',
           'args' => array(
             array(
-              'name' => 'nid',
-              'optional' => FALSE,
-              'source' => array('path' => 0),
-              'type' => 'int',
-              'description' => 'The nid of the node to update',
-            ),
-            array(
               'name' => 'node',
               'optional' => FALSE,
               'source' => 'data',
               'description' => 'The node data to update',
               'type' => 'array',
             ),
+            array(
+              'name' => 'nid',
+              'optional' => FALSE,
+              'source' => array('path' => 0),
+              'type' => 'int',
+              'description' => 'The nid of the node to update',
+            ),
+            
           ),
           'access callback' => '_node_resource_access',
           'access arguments' => array('update'),
@@ -397,6 +398,7 @@ function _node_resource_validate_type($node) {
 function _node_resource_update($nid, $node) {
   // Adds backwards compatability with regression fixed in #1083242
   $node = _services_arg_value($node, 'node');
+  
   print_r($node); die();
 
   $node['nid'] = $nid;
