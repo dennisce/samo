@@ -108,7 +108,6 @@ class HttpClient {
    * Executes a PUT request.
    */
   public function put($url, $data = NULL, $parameters = array()) {
-    print_r($parameters);die();
     return $this->execute(new HttpClientRequest($url, array(
       'method' => 'PUT',
       'parameters' => $parameters,
