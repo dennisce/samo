@@ -395,6 +395,7 @@ function _node_resource_validate_type($node) {
  * @see drupal_form_submit()
  */
 function _node_resource_update($nid, $node) {
+  print_r($node); die();
   // Adds backwards compatability with regression fixed in #1083242
   $node = _services_arg_value($node, 'node');
 
