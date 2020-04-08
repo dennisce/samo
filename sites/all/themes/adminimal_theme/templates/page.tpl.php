@@ -6,7 +6,7 @@
 	drupal_add_js($mask);
 	drupal_add_js($base_url."/".path_to_theme().'/js/utils.js');
 	// die($lib."/core/bootstrap.min.css");
-	header('Access-Control-Allow-Origin: *');
+	
 ?>
 
 
@@ -34,7 +34,7 @@ j(document).ready(function (){
 
 	
 });
-
+/*
 var form = new FormData();
 form.append("type", "agendamento");
 form.append("title", "Agendamento srv2");
@@ -79,9 +79,9 @@ var settings = {
 j.ajax(settings).done(function (response) {
   console.log(response);
 });
-
+*/
 </script>
-<?php /*
+<?php 
 <div id="loading" style="display:none"></div>
 <div id="branding" class="clearfix">
 
