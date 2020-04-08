@@ -114,7 +114,7 @@ function salvarProntuario(){
 function manipulaAgendamento(){
   
   $h = getallheaders();
-  debugFake($_SERVER);
+  //debugFake($_SERVER);
 
   $agendamento = node_load($_POST['ID']);
   // Dados iniciais caso não exista agendamento passado como parametro
