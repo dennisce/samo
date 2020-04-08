@@ -1075,7 +1075,7 @@ function node_submit($node) {
  *   omitted (or $node->is_new is TRUE), a new node will be added.
  */
 function node_save($node) {
-  // print_r($node); die();
+   print_r($node); die();
   $transaction = db_transaction();
 
   try {
