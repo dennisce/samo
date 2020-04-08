@@ -81,7 +81,7 @@ j.ajax(settings).done(function (response) {
 });
 */
 </script>
-<?php 
+
 <div id="loading" style="display:none"></div>
 <div id="branding" class="clearfix">
 
