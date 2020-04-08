@@ -125,8 +125,12 @@ function manipulaAgendamento(){
     $agendamento->comment = 0;
     $agendamento->promote = 0;
     $agendamento->sticky = 0;
-    global $user;
-    $agendamento->uid = $user->uid;
+    if(!isset($_POST['UID'])){
+      global $user;
+      $agendamento->uid = $user->uid;
+    } else {
+      $agendamento->uid = $_POST['UID'];
+    }
     $agendamento->title = 'Agendamento '.time();
   }
   
