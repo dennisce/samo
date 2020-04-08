@@ -1,6 +1,20 @@
 <?php
 
-define("API_KEY","Q_1RFryRrTTj_aZ69x75HA");
+define("API_KEY","jTauG01zBT_BLiZCaJ9JEg");
+function api_key(){
+  $h = getallheaders();
+  
+  if(strpos($_SERVER['HTTP_REFERER'],'localhost') || strpos($_SERVER['HTTP_REFERER'],'nesaude.com')){
+    $api_key = API_KEY;
+  } else {
+    $api_key = $h['api-key'];
+  }
+  
+  if($api_key != API_KEY){
+    echo "API KEY inválida ou inexistente";
+    die();
+  }
+}
 
 function eventos_menu() {
 
@@ -15,6 +29,31 @@ function eventos_menu() {
 
   $items['admin/calendar/getEventos'] = array(
     'delivery callback' => 'getEventos',
+    'access arguments' => array('access content')
+  );
+
+  $items['admin/calendar/getEventos'] = array(
+    'delivery callback' => 'getEventos',
+    'access arguments' => array('access content')
+  );
+
+  $items['admin/listaProfissionais'] = array(
+    'delivery callback' => 'listaProfissionais',
+    'access arguments' => array('access content')
+  );
+
+  $items['admin/getAgendamento'] = array(
+    'delivery callback' => 'getAgendamento',
+    'access arguments' => array('access content')
+  );
+
+  $items['admin/manipulaPaciente'] = array(
+    'delivery callback' => 'manipulaPaciente',
+    'access arguments' => array('access content')
+  );
+
+  $items['admin/listaProcedimentos'] = array(
+    'delivery callback' => 'listaProcedimentos',
     'access arguments' => array('access content')
   );
 
@@ -67,6 +106,17 @@ function eventos_menu() {
   
 }
 
+function getAgendamento(){
+  // Valida a api_key
+  api_key();
+
+  $n = node_load($_POST['NID']);
+
+  $retorno = json_encode($n);
+  print($retorno);
+
+}
+
 function importProcedimento(){
   // $p = node_load(99);
   // debugFake($p);
@@ -80,7 +130,9 @@ function importProcedimento(){
 }
 
 function salvarProntuario(){
-  
+  // Valida a api_key
+  api_key();
+
   global $user;
   global $base_url;
 
@@ -111,11 +163,48 @@ function salvarProntuario(){
   
 }
 
+function listaProfissionais(){
+  // Valida a api_key
+  api_key();
+
+  $json = '[
+    {"UID":"64","NOME":"Ana Maria Abreu","ESPECIALIDADES":["Clínico Geral","Pediatra"]},
+    {"UID":"70","NOME":"Leonardo Alano","ESPECIALIDADES":["Clínico Geral","Psiquiatra"]}
+  ]';
+
+  $json = trim($json, " \t\n\r");
+  echo $json;
+
+}
+
+function listaProcedimentos(){
+  // Valida a api_key
+  api_key();
+
+  $json = '[
+    {"NID":"440","NOME":"Teleconsulta - Pediatra","Valor":85},
+    {"NID":"441","NOME":"Teleconsulta - Psiquiatra","Valor":85},
+    {"NID":"428","NOME":"Teleconsulta - Clínico","Valor":75}
+  ]';
+
+  $json = trim($json, " \t\n\r");
+  echo $json;
+
+}
+
 function manipulaAgendamento(){
   
-  $h = getallheaders();
-  //debugFake($_SERVER);
-
+  // Valida a api_key
+  api_key();
+  if(isset($_POST['UID'])){
+    $user = user_load($_POST['UID']);
+  } else {
+    global $user;
+  }
+  if(!$user){
+    echo "UID inválido ou inexistente";
+    die();
+  }
   $agendamento = node_load($_POST['ID']);
   // Dados iniciais caso não exista agendamento passado como parametro
   if(!$agendamento){
@@ -125,12 +214,8 @@ function manipulaAgendamento(){
     $agendamento->comment = 0;
     $agendamento->promote = 0;
     $agendamento->sticky = 0;
-    if(!isset($_POST['UID'])){
-      global $user;
-      $agendamento->uid = $user->uid;
-    } else {
-      $agendamento->uid = $_POST['UID'];
-    }
+    
+    $agendamento->uid = $user->uid;
     $agendamento->title = 'Agendamento '.time();
   }
   
@@ -207,6 +292,10 @@ function manipulaAgendamento(){
 }
 
 function paciente_form($form, &$form_state) {
+
+  // Valida a api_key
+  api_key();
+
   $aredirect = explode('/',$_GET['q']);
   $profissional = $aredirect[count($aredirect)-1];
   $redirect = $aredirect[count($aredirect)-2].'/'.$profissional;
@@ -360,7 +449,83 @@ function paciente_form_submit($form, &$form_state) {
 
 }
 
+function manipulaPaciente(){
+  // Valida a api_key
+  api_key();
+
+
+  $n = array();
+  $n = explode(' - ',$_POST['NOME']);
+  $nomeCompleto = (count($n) > 0)?$n[0]:$_POST['NOME'];
+  $nomeCompletoSemAcento = retiraAcentos($nomeCompleto);
+
+  $name = trim($nomeCompletoSemAcento, " \t\n\r");
+  $email = ($nomeCompleto == '')?null:$name.rand()."@nesaude.com";
+
+  $telefone = array(
+    'und' => array(
+      0 => array(
+        'value' => $_POST['TELEFONE'],
+        'format' => '',
+        'safe_value' => $_POST['TELEFONE']
+      )
+    )
+  );
+
+  $new_user = array(
+    'name' => $email,
+    'pass' => '$S$DdZ32sNE2leF3STLsNGgr5ywhHRQQ7MblpezVAc2VFK7valrkr5R', // senha
+    'mail' => $email,
+    'status' => 1,
+    'init' => $email,
+    'roles' => array(
+      DRUPAL_AUTHENTICATED_RID => 'authenticated user',
+      5 => 'Paciente'
+    ),
+    'field_nome_completo' => array(
+      'und' => array(
+        0 => array(
+          'value' => $nomeCompleto,
+          'format' => '',
+          'safe_value' => $nomeCompletoSemAcento
+        )
+      )
+    ),
+    'field_telefone' => $telefone
+  );
+  
+  $uid = $_POST['UID'];
+
+  if($uid == ' ' || $uid == ''){
+ 
+    $account = user_save('',$new_user);
+    $usr = user_load_by_mail($email);
+    $uid = $usr->uid;
+    
+  } else {
+
+    $usr = user_load($uid);
+    $edit = array('field_telefone' => $telefone);
+    $account = user_save($usr,$edit);
+
+  }
+  
+  if (!$account) {
+
+    echo "Erro ao salvar o Paciente.";
+    die();
+
+  } else {
+    
+    print_r(json_encode($usr));
+    
+  }
+}
+
 function getEventos(){
+  // Valida a api_key
+  api_key();
+
 
   global $user;
   if(isset($user->roles[4]) && !isset($user->roles[3])){
@@ -399,6 +564,9 @@ function getEventos(){
 
 function getEventosByProfissional(){
   
+  // Valida a api_key
+  api_key();
+
   global $user;
   if(isset($user->roles[4]) && !isset($user->roles[3])){
 
@@ -439,6 +607,9 @@ function getEventosByProfissional(){
 }
 
 function processaEventos($sql,$tipo){
+
+  // Valida a api_key
+  api_key();
 
   $event = Array();
   $procedimentos = Array();
@@ -520,6 +691,10 @@ function processaEventos($sql,$tipo){
 }
 
 function alterEvento(){
+
+  // Valida a api_key
+  api_key();
+
   $agendamento = node_load($_POST['id']);
   
   $agendamento->field_data['und'][0]['value'] = $_POST['start'];
@@ -533,6 +708,9 @@ function alterEvento(){
 
 function getProcedimentos(){
   
+  // Valida a api_key
+  api_key();
+
   $nid = '';
   $ret = Array();
   $objProcedimento[] = new stdClass();
@@ -568,6 +746,9 @@ function getProcedimentos(){
 
 function getDadosProcedimentos(){
 
+  // Valida a api_key
+  api_key();
+
   $procedimento = node_load($_GET['nid']);
 
   print(json_encode($procedimento));
@@ -575,6 +756,9 @@ function getDadosProcedimentos(){
 }
 
 function getPagamentos(){
+
+  // Valida a api_key
+  api_key();
 
   $nid = '';
   $ret = Array();
@@ -615,6 +799,9 @@ function getPagamentos(){
 
 function getCalculo($agendamentoId,$retorno,$tipo){
   
+  // Valida a api_key
+  api_key();
+
   $agendamento = node_load($agendamentoId);
 
   if($tipo == 'pago'){
@@ -638,6 +825,9 @@ function getCalculo($agendamentoId,$retorno,$tipo){
 
 function getSaldo(){
   
+  // Valida a api_key
+  api_key();
+
   $totalExecutado  = 0.00;
   $totalPago  = 0.00;
   $ret = Array();
