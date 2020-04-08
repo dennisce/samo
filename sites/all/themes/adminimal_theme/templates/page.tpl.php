@@ -65,10 +65,6 @@ var settings = {
   "method": "PUT",
   "headers": {
     "api-key": "Q_1RFryRrTTj_aZ69x75HA",
-    "cache-control": "no-cache",
-    "Access-Control-Allow-Origin:": "*",
-    "Access-Control-Allow-Headers": "Content-Type",
-    "postman-token": "f8765395-9379-6f33-7b7c-4d62a4cc7976"
   },
   "processData": false,
   "contentType": false,
