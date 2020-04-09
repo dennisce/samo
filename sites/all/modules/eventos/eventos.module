@@ -17,7 +17,7 @@ function api_key(){
     echo "API KEY inválida ou inexistente";
     die();
   }
-}
+} 
 
 function eventos_menu() {
 
