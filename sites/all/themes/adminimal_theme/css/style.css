@@ -3169,6 +3169,7 @@ div.diff-section-title {
 .Cancelado{
   box-shadow: inset 20px 0px #FF0000;
 }
+.Faltou,
 .evento{
   box-shadow: inset 20px 0px black;
 }
@@ -3609,8 +3610,8 @@ div.field-container table .footer td{
   margin: 20px 0 75px;
 }
 
-.view-relat-rio-de-produtividade #edit-field-data-value-wrapper .views-widget #edit-field-data-value-min-wrapper,
-.view-relat-rio-de-produtividade #edit-field-data-value-wrapper .views-widget #edit-field-data-value-max-wrapper{
+#edit-field-data-value-wrapper .views-widget #edit-field-data-value-min-wrapper,
+#edit-field-data-value-wrapper .views-widget #edit-field-data-value-max-wrapper{
   float: left;
 }
 
@@ -3621,13 +3622,33 @@ div.field-container table .footer td{
   padding: 0;
 }
 
+.view-display-id-agendamento .views-submit-button,
 .view-relat-rio-de-produtividade .views-submit-button{
   clear: both;
   margin: 0;
   padding: 0;
   width: 100%;
 }
+.view-display-id-agendamento .views-submit-button input,
 .view-relat-rio-de-produtividade .views-submit-button input{
   margin: 0!important;
   width: 100%;
+}
+
+/*Relatórios*/
+.view-id-reports td{
+  table-layout: fixed;
+  width: 14,2%;
+  overflow: hidden;
+}
+.view-id-reports tr.footer{
+  font-weight: bold;
+  font-size: 18px;
+}
+.view-id-reports tr.footer td{
+  padding-left: 0;
+}
+.view-id-reports span.qtd{
+  background-color:#FFF;
+  padding-right: 15px;
 }

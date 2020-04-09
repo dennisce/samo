@@ -881,7 +881,7 @@ function getSaldo(){
     }
 
   } else {
-    echo "Oi";die(0.00);
+    die(0.00);
   }
 
   $event = Array();
