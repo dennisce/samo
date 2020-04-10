@@ -3645,10 +3645,31 @@ div.field-container table .footer td{
   font-weight: bold;
   font-size: 18px;
 }
+.view-id-reports tr.saldo td{
+  border-top: 1px solid #295f39;
+  text-align: center;
+}
 .view-id-reports tr.footer td{
   padding-left: 0;
 }
 .view-id-reports span.qtd{
-  background-color:#FFF;
-  padding-right: 15px;
+  padding-left: 25px;
+}
+
+span.even{
+  border-color: #f3f4ee;
+  background: #f3f4ee;
+}
+span.odd{
+  border-color: #fff;
+  background: #fff;
+}
+span.odd,
+span.even{
+  padding: 3px;
+}
+
+.consolidado{
+  width: 50%;
+  float: left;
 }

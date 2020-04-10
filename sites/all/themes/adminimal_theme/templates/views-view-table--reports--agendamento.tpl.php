@@ -33,6 +33,8 @@ $qtdAtendidos = 0;
 $qtdCancelados = 0;
 $qtdFaltas = 0;
 $totalPeriodo = 0;
+$saldoPeriodo = 0;
+$totalForma = [0,0,0,0,0,0];
 global $base_url;
 ?>
 <table <?php if ($classes): ?> class="<?php print $classes; ?>"<?php endif ?><?php print $attributes; ?>>
@@ -136,7 +138,7 @@ global $base_url;
                   $procedimento = node_load($v['target_id']);
                   if($agendamento->field_executou['und'][$k]['value']){
                     echo "<li>$procedimento->title</li>";
-                    $totalExecutado += $agendamento->field_valor['und'][$k]['value'];
+                    $totalExecutado += floatval($agendamento->field_valor['und'][$k]['value']);
                   }
                 }  
               }
@@ -161,6 +163,7 @@ global $base_url;
                   foreach($agendamento->field_valor_pago['und'] as $k=>$v){
                   echo "<li>R$ ".number_format($v['value'], 2, ',', '.')."</li>";
                   $totalPago += floatval($v['value']);
+                  $totalForma[$agendamento->field_forma['und'][$k]['value']] += floatval($v['value']);
                 }  
               }
             ?>
@@ -169,7 +172,8 @@ global $base_url;
           
           <?php 
             $saldo = $totalPago - $totalExecutado;
-            $totalPeriodo += $saldo; 
+            $totalPeriodo += $totalPago;
+            $saldoPeriodo += $saldo;
           ?>
           <td <?php if ($field_classes[$field][$row_count]): ?> class="<?= ($saldo>=0)?"credito":"debito" ?> <?php print $field_classes[$field][$row_count]; ?>"<?php endif; ?><?php print drupal_attributes($field_attributes[$field][$row_count]); ?>>
             
@@ -178,17 +182,85 @@ global $base_url;
         <?php endforeach; ?>
       </tr>
     <?php endforeach; ?>
-    <tr class="footer">
-      <td colspan="6" style="text-align:center"><?=$qtdAgendamentos?> Agendamentos</td>
-      <td class="<?= ($totalPeriodo>=0)?"credito":"debito" ?>">R$ <?=number_format($totalPeriodo, 2, ',', '.')?></td>
-    </tr>
-    <tr class="footer">
-            <td class="Faltou"><span class="qtd"><?=$qtdFaltas?></span> Faltas</td>
-            <td class="Agendado"><span class="qtd"><?=$qtdAgendados?></span> Agendados</td>
-            <td class="Confirmado"><span class="qtd"><?=$qtdConfirmados?></span> Confirmados</td>
-            <td class="Emespera"><span class="qtd"><?=$qtdEmEspera?></span> Em espera</td>
-            <td colspan="2" class="Ematendimento"><span class="qtd"><?=$qtdEmAtendimento?></span> Em atendimento</td>
-            <td class="Atendido"><span class="qtd"><?=$qtdAtendidos?></span> Atendidos</td>
+    <tr class="footer saldo">
+      <td><?=$qtdAgendamentos?></td>
+      <td colspan="2"></td>
+      <td>R$ <?=number_format(($totalPeriodo-$saldoPeriodo), 2, ',', '.')?></td>
+      <td></td>
+      <td>R$ <?=number_format($totalPeriodo, 2, ',', '.')?></td>
+      <td class="<?= ($saldoPeriodo>=0)?"credito":"debito" ?>">R$ <?=number_format($saldoPeriodo, 2, ',', '.')?></td>
     </tr>
   </tbody>
 </table>
+<pre>
+</pre>
+
+<fieldset><legend>Consolidados</legend>
+
+  <table class="consolidado">
+    <thead>
+      <tr>
+          <th class="" scope="col">
+            Status
+          </th>
+          <th class="" scope="col">
+            Total
+          </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="footer even">
+        <td class="Faltou"><span class="qtd">Faltas</span></td>
+        <td><?=$qtdFaltas?></td>
+      </tr>
+      <tr class="footer odd">
+        <td class="Agendado"><span class="qtd">Agendados</span></td>
+        <td><?=$qtdAgendados?></td>
+      </tr>
+      <tr class="footer even">
+        <td class="Confirmado"><span class="qtd">Confirmados</span></td>
+        <td><?=$qtdConfirmados?></td>
+      </tr>
+      <tr class="footer odd">
+        <td class="Emespera"><span class="qtd">Em espera</span></td>
+        <td><?=$qtdEmEspera?></td>
+      </tr>
+      <tr class="footer even">
+        <td class="Ematendimento"><span class="qtd">Em atendimento</span></td>
+        <td><?=$qtdEmAtendimento?></td>
+      </tr>
+      <tr class="footer odd">
+        <td class="Atendido"><span class="qtd">Atendidos</span></td>
+        <td><?=$qtdAtendidos?></td>
+      </tr>
+      <tr class="footer even">
+        <td class="Cancelado"><span class="qtd">Cancelados</span></td>
+        <td><?=$qtdCancelados?></td>
+      </tr>
+      </tbody>
+    </table>
+  <table class="consolidado">
+    <thead>
+      <tr>
+        <th class="" scope="col">
+            Forma de pagamento
+          </th>
+          <th class="" scope="col">
+            Total
+          </th>
+      </tr>
+      </thead>
+    <tbody>
+      <?php
+        foreach($totalForma as $k=>$v){
+          $class = ($k%2==0)?"even":"odd";
+            echo '<tr class="footer '.$class.'">';
+              echo "<td>".$formaValues[$k]."</td>";
+              echo "<td>R$ ".number_format($v, 2, ',', '.')."</td>";
+            echo '</tr>';
+        }
+      ?>
+      <tr class="even"><td> - </td><td> - </td></tr>
+      </tbody>
+  </table>
+</fieldset>
