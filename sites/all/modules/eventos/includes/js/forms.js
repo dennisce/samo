@@ -32,9 +32,6 @@ j(document).ready(function (){
             dadosPaciente.lastIndexOf("}")
         );
         j("#edit-genero-"+genero).click();
-            console.log(nascimento)
-            console.log(genero)
-            console.log(telefone)
       });
       
 });
