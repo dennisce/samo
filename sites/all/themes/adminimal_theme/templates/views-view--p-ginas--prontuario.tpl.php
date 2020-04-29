@@ -29,6 +29,33 @@
   } else {
     $dadosTitle = ' do Paciente';
   }
+
+  function calculaIdade($data){
+    if($data){
+      // Separa em dia, mês e ano
+      list($datadonascimento, $trash) = explode(" ",$data);
+      list($ano, $mes, $dia) = explode('-', $datadonascimento);
+
+      // Descobre que dia é hoje e retorna a unix timestamp
+      $hoje = mktime(0, 0, 0, date('m'), date('d'), date('Y'));
+      // Descobre a unix timestamp da data de nascimento do fulano
+      $diadonascimento = mktime(0, 0, 0, $mes, $dia, $ano);
+
+      // Depois apenas fazemos o cálculo já citado :)
+      $idade = floor((((($hoje - $diadonascimento) / 60) / 60) / 24) / 365.25);
+
+      return $dia."/".$mes."/".$ano." - ".$idade." anos";
+
+    } else {
+      return "Data de nascimento não informada";
+    }
+
+  }
+
+  // Recupera os valores dos fields para os inputs
+$all_fields_on_my_website = field_info_fields();
+$generoValues = list_allowed_values($all_fields_on_my_website["field_genero"]);
+$genero = ($paciente->field_genero['und'][0]['value'])? $paciente->field_genero['und'][0]['value'] : 0;
 ?>
 <script type="text/javascript">
 var j = jQuery.noConflict();
@@ -51,16 +78,28 @@ j(document).ready(function(){
         <div class="field-content telefone-<?=$paciente->uid?>"><?=$paciente->field_telefone['und'][0]['value']?></div>
       </div>
     </div>
+    <div class="views-field-field-nome-completo">
+      <sup><b>Gênero:</b></sup>
+      <h1><?= $generoValues[$genero] ?></h1><br />
+    </div>
+    <div class="views-field-field-nome-completo">
+      <sup><b>Nascimento:</b></sup>
+      <h1><?php
+        echo calculaIdade($paciente->field_data_de_nascimento['und'][0]['value']);
+      ?></h1>
+    </div>
 <?php if(isset($agendamento->field_procedimentos['und'])){ ?>
-    <?php foreach($agendamento->field_procedimentos['und'] as $k=>$v){ ?>
-        <?php $procedimento = node_load($v['target_id']); ?>
-        <?php $classExecutou = ($agendamento->field_executou['und'][$k]['value'])? 'EXEC':'PEND' ?>
-        <li class="<?=$classExecutou?>">
-            <?=$agendamento->field_quantidade_do_procedimento['und'][$k]['value']?>x 
-            <?=$procedimento->title?> - 
-            <?= $agendamento->field_obs_do_procedimento['und'][$k]['value'] ?>
-        </li>
-    <?php  }  ?>
+    <ul class="procedimentos">
+      <?php foreach($agendamento->field_procedimentos['und'] as $k=>$v){ ?>
+          <?php $procedimento = node_load($v['target_id']); ?>
+          <?php $classExecutou = ($agendamento->field_executou['und'][$k]['value'])? 'EXEC':'PEND' ?>
+          <li class="<?=$classExecutou?>">
+              <?=$agendamento->field_quantidade_do_procedimento['und'][$k]['value']?>x 
+              <?=$procedimento->title?> - 
+              <?= $agendamento->field_obs_do_procedimento['und'][$k]['value'] ?>
+          </li>
+      <?php  }  ?>
+    </ul>
   <?php  }  ?>
   </fieldset>
 <?php if($agendamentoNid && $dataAgendamento == $hoje){ ?>

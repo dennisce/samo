@@ -3360,6 +3360,7 @@ button.active{
   display: none;
 }
 
+/*Prontuario*/
 .view-display-id-prontuario .views-row-odd,
 .view-display-id-prontuario .views-row-odd legend{
   background-color: #EDEDED;
@@ -3370,6 +3371,11 @@ button.active{
   background-color: #FFF;
   padding: 5px;
 }
+
+.dados .procedimentos{
+  margin-top: 20px;
+}
+/*/Prontuario*/
 
 .mouseHover:hover{
   cursor: pointer;
@@ -3673,3 +3679,4 @@ span.even{
   width: 50%;
   float: left;
 }
+

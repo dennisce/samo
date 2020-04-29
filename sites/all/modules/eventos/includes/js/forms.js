@@ -7,21 +7,32 @@ j(document).ready(function (){
         }
     });
     j('#autocompleteNomePaciente').bind('autocompleteSelect', function(event, node) {
-        let str = j('#autocompleteNomePaciente').val();
-        nomeAnterior = str;
-        var uid = str.substring(
-            str.lastIndexOf("(") + 1, 
-            str.lastIndexOf(")")
+        let dadosPaciente = j('#autocompleteNomePaciente').val();
+        nomeAnterior = dadosPaciente;
+        var uid = dadosPaciente.substring(
+            dadosPaciente.lastIndexOf("(") + 1, 
+            dadosPaciente.lastIndexOf(")")
         );
         j('input[name ="uid"]').val(uid);
 
-        let str2 = j('#autocompleteNomePaciente').val();
-        var telefone = str2.substring(
-            str2.lastIndexOf("<") + 1, 
-            str2.lastIndexOf(">")
+        var telefone = dadosPaciente.substring(
+            dadosPaciente.lastIndexOf("<") + 1, 
+            dadosPaciente.lastIndexOf(">")
         );
         j("#edit-telefone").val(telefone);
 
+        var nascimento = dadosPaciente.substring(
+            dadosPaciente.lastIndexOf("[") + 1, 
+            dadosPaciente.lastIndexOf("]")
+        );
+        j("#edit-nascimento").val(nascimento);
+
+        var genero = dadosPaciente.substring(
+            dadosPaciente.lastIndexOf("{") + 1, 
+            dadosPaciente.lastIndexOf("}")
+        );
+        j("#edit-genero-"+genero).click();
+            console.log(genero)
       });
       
 });

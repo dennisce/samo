@@ -312,6 +312,24 @@ function paciente_form($form, &$form_state) {
     '#maxlength' => 255,
     '#required' => false,
   );
+  $form['genero'] = array(
+    '#type' => 'radios',
+    '#title' => 'Gênero',
+    '#options' => array(
+        "Não informado",
+        "Masculino",
+        "Feminino"
+    ),
+    '#default_value' => 0,
+    '#required' => false, 
+  ); 
+  $form['nascimento'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Data de nascimento',
+    '#size' => 20,
+    '#maxlength' => 10,
+    '#required' => false, 
+  ); 
   $form['telefone'] = array(
     '#type' => 'textfield',
     '#title' => 'Telefone',
@@ -359,9 +377,15 @@ function paciente_form_validate($form, &$form_state) {
   if($form['uid']['#value'] == ' '|| $form['uid']['#value'] == ''){
     $erroNome = preg_match('|^[\pL\s]+$|u',$form['nome']['#value']);
     if(!$erroNome){
-      form_set_error('nome', "Nome do paciente inválido ".$erroNome);
+      form_set_error('nome', "Nome do paciente inválido");
     }
     
+  }
+  if($form['nascimento']['#value'] != ''){
+    $dt = explode('/',$form['nascimento']['#value']);
+    if(!checkdate($dt[1],$dt[0],$dt[2])){
+      form_set_error('nascimento',"Data de nascimento inválida");
+    }
   }
 
   $erro = db_select("users","u")
@@ -396,6 +420,30 @@ function paciente_form_submit($form, &$form_state) {
     )
   );
 
+  if($form['nascimento']['#value'] != ''){
+    $dt = explode('/',$form['nascimento']['#value']);
+    $dtNascimento = $dt[2]."-".$dt[1]."-".$dt[0]." 00:00:00";
+    $nascimento = array(
+      'und' => array(
+        0 => array(
+          'value' => $dtNascimento,
+          'timezone' => 'America/Sao_Paulo',
+          'date_type' => 'datetime'
+        )
+      )
+    );
+  } else {
+    $nascimento = array();
+  }
+
+  $genero = array(
+    'und' => array(
+      0 => array(
+        'value' => $form['genero']['#value'],
+      )
+    )
+      );
+
   $new_user = array(
     'name' => $email,
     'pass' => '$S$DdZ32sNE2leF3STLsNGgr5ywhHRQQ7MblpezVAc2VFK7valrkr5R', // senha
@@ -415,6 +463,8 @@ function paciente_form_submit($form, &$form_state) {
         )
       )
     ),
+    'field_genero' => $genero,
+    'field_data_de_nascimento' => $nascimento,
     'field_telefone' => $telefone
   );
   
@@ -429,7 +479,11 @@ function paciente_form_submit($form, &$form_state) {
   } else {
 
     $usr = user_load($uid);
-    $edit = array('field_telefone' => $telefone);
+    $edit = array(
+    'field_genero' => $genero,
+    'field_data_de_nascimento' => $nascimento,
+    'field_telefone' => $telefone,
+    );
     $account = user_save($usr,$edit);
 
   }

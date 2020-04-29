@@ -19,7 +19,8 @@ html.js body {
   display: table;
   margin: 0 auto;
   min-height: 100px;
-  min-width: 700px;
+  /* min-width: 700px; */
+  max-width: 88%;
   position: relative;
   padding: .2em;
   padding-bottom: 2em;

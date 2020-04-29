@@ -11,6 +11,8 @@ j(document).ready(function(){
       }
   };
   j("#edit-telefone").mask(SPMaskBehavior,spOptions);
+  j("#edit-nascimento").mask("99/99/9999");
+
   addContextMenu();
   Drupal.behaviors.contextMenu = {
     attach: function(context, settings){
@@ -79,7 +81,6 @@ function autoCompleteJS(base_url,autoComplete){
 
       return autoComplete;
 }
-
 
 function addComportamento(base_url, ui, local){
     let nid = ui.item.value.substring(
@@ -184,6 +185,7 @@ function buscaProcedimentos(base_url, res,req){
   })
           
 }
+
 function setCookie(name,exdays,value){
   var expires;
 
@@ -220,6 +222,7 @@ function formatDate(date) {
       return dt[2]+"/"+dt[1]+"/"+dt[0];
     }
 }
+
 function calculaSaldoTotal(base_url,pid){
   //Pegar os valores do saldo TOTAL
   j.get(base_url+"/admin/getSaldo?pid="+pid, function(ret){
@@ -252,7 +255,6 @@ function calculaSaldoTotal(base_url,pid){
 
   });
 }
-
 
 function addContextMenu(){
 	j(".view-display-id-block_pacientes .views-row").on("click contextmenu", function(e){
