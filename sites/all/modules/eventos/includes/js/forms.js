@@ -32,7 +32,6 @@ j(document).ready(function (){
             dadosPaciente.lastIndexOf("}")
         );
         j("#edit-genero-"+genero).click();
-            console.log(genero)
       });
       
 });
