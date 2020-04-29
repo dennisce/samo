@@ -34,4 +34,3 @@ j(document).ready(function (){
         j("#edit-genero-"+genero).click();
       });
 });
-  
