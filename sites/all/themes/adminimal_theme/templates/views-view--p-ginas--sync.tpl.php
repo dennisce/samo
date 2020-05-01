@@ -11,7 +11,7 @@ function toDo(url){
 
 </script>
 <ul>
-	<li><a class="button bto" href="#" id="bto" onClick="toDo('/admin/convert')"> Converter DICOM ! </a> <br /><br /></li>
+	<li><a class="button bto" href="#" id="bto" onClick="toDo('/sites/all/modules/dicom_convert/convert.php')"> Converter DICOM ! </a> <br /><br /></li>
 	<li><a class="button bto" href="/admin/sync?op=update" id="bto"> Importar imagens ! </a></li>
 </ul>
 <div id="alvo"></div>

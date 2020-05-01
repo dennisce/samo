@@ -6,7 +6,7 @@ error_reporting(E_ALL | E_STRICT);
 require 'nanodicom.php';
 
 // Diretório onde as imagens DICOM estarão
-$dir = "dicom/";
+$dir = "\/DICOM/";
 
 $files = array();
 if ($handle = opendir($dir)) {

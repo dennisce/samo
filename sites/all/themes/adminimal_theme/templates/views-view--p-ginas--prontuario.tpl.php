@@ -55,7 +55,7 @@
   // Recupera os valores dos fields para os inputs
 $all_fields_on_my_website = field_info_fields();
 $generoValues = list_allowed_values($all_fields_on_my_website["field_genero"]);
-$genero = ($paciente->field_genero['und'][0]['value'])? $paciente->field_genero['und'][0]['value'] : 0;
+$genero = (isset($paciente->field_genero['und']))? $paciente->field_genero['und'][0]['value'] : 0;
 ?>
 <script type="text/javascript">
 var j = jQuery.noConflict();
@@ -85,7 +85,12 @@ j(document).ready(function(){
     <div class="views-field-field-nome-completo">
       <sup><b>Nascimento:</b></sup>
       <h1><?php
+      if(isset($paciente->field_data_de_nascimento['und'])){
         echo calculaIdade($paciente->field_data_de_nascimento['und'][0]['value']);
+      } else {
+        echo calculaIdade('');
+      }
+        
       ?></h1>
     </div>
 <?php if(isset($agendamento->field_procedimentos['und'])){ ?>
