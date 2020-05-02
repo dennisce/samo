@@ -365,15 +365,13 @@ function paciente_form($form, &$form_state) {
 }
 
 function retiraAcentos($string){
-  $acentos  =  'ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûýýþÿŔŕ';
-  $sem_acentos  =  'aaaaaaaceeeeiiiidnoooooouuuuybsaaaaaaaceeeeiiiidnoooooouuuyybyRr';
-  $string = strtr($string, utf8_decode($acentos), $sem_acentos);
-  $string = str_replace(" ","-",$string);
-  return utf8_decode($string);
+  $comAcentos = array('à', 'á', 'â', 'ã', 'ä', 'å', 'ç', 'è', 'é', 'ê', 'ë', 'ì', 'í', 'î', 'ï', 'ñ', 'ò', 'ó', 'ô', 'õ', 'ö', 'ù', 'ü', 'ú', 'ÿ', 'À', 'Á', 'Â', 'Ã', 'Ä', 'Å', 'Ç', 'È', 'É', 'Ê', 'Ë', 'Ì', 'Í', 'Î', 'Ï', 'Ñ', 'Ò', 'Ó', 'Ô', 'Õ', 'Ö', 'O', 'Ù', 'Ü', 'Ú');
+  $semAcentos = array('a', 'a', 'a', 'a', 'a', 'a', 'c', 'e', 'e', 'e', 'e', 'i', 'i', 'i', 'i', 'n', 'o', 'o', 'o', 'o', 'o', 'u', 'u', 'u', 'y', 'A', 'A', 'A', 'A', 'A', 'A', 'C', 'E', 'E', 'E', 'E', 'I', 'I', 'I', 'I', 'N', 'O', 'O', 'O', 'O', 'O', '0', 'U', 'U', 'U');
+  return str_replace($comAcentos, $semAcentos, $string);
 }
 
 function paciente_form_validate($form, &$form_state) {
-    
+
   if($form['uid']['#value'] == ' '|| $form['uid']['#value'] == ''){
     $erroNome = preg_match('|^[\pL\s]+$|u',$form['nome']['#value']);
     if(!$erroNome){
@@ -406,8 +404,7 @@ function paciente_form_submit($form, &$form_state) {
   $n = explode(' - ',$form['nome']['#value']);
   $nomeCompleto = (count($n) > 0)?$n[0]:$form['nome']['#value'];
   $nomeCompletoSemAcento = retiraAcentos($nomeCompleto);
-
-  $name = trim($nomeCompletoSemAcento, " \t\n\r");
+  $name = substr(str_replace(" ","",$nomeCompletoSemAcento),0,10);
   $email = ($nomeCompleto == '')?null:$name.rand()."@nesaude.com";
 
   $telefone = array(
