@@ -3684,6 +3684,7 @@ span.even{
 .laudo .title{
   text-align: center;
   color: #295f39;
+  font-weight: bold!important;
 }
 .laudo .assinatura{
   text-align: center;
