@@ -3681,6 +3681,9 @@ span.even{
 }
 
 /* Laudos */
+.print-logo{
+  box-shadow: none!important;
+}
 .laudo .title{
   text-align: center;
   color: #295f39;
