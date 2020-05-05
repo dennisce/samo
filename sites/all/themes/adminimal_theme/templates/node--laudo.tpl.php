@@ -111,7 +111,7 @@ $autor = user_load((isset($node->revision_uid))? $node->revision_uid:$node->uid)
       <?php
         if(isset($node->field_imagens)){
           foreach($node->field_imagens['und'] as $k=>$v){
-            echo "<img src='".file_create_url($v['uri'])."' width='330px' />";
+            echo "<img src='".file_create_url($v['uri'])."' width='430px' />";
           }
         }
       ?>
