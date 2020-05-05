@@ -95,14 +95,16 @@ $autor = user_load((isset($node->revision_uid))? $node->revision_uid:$node->uid)
   <?php print $user_picture; ?>
 
   <div class="content laudo"<?php print $content_attributes; ?>>
-    <h1 class="title"><?=$node->field_procedimentos['und'][0]['entity']->title?></h1>
-    <b>Nome completo:</b> <?=$node->field_paciente['und'][0]['entity']->field_nome_completo['und'][0]['value']?><br />
-    <b>Data de nascimento:</b> <?=converteData($node->field_paciente['und'][0]['entity']->field_data_de_nascimento['und'][0]['value'])?><br />
-    <b>Gênero:</b> <?=$generoValues[$genero]?><br />
-    <b>Data de realização:</b> <?=converteData($node->field_data_do_exame['und'][0]['value'])?><br /><br />
-    <p>
-      <?=$node->body['und'][0]['value']?>
-    </p>
+    <div class="conteudo">
+      <h1 class="title"><?=$node->field_procedimentos['und'][0]['entity']->title?></h1>
+      <b>Nome completo:</b> <?=$node->field_paciente['und'][0]['entity']->field_nome_completo['und'][0]['value']?><br />
+      <b>Data de nascimento:</b> <?=converteData($node->field_paciente['und'][0]['entity']->field_data_de_nascimento['und'][0]['value'])?><br />
+      <b>Gênero:</b> <?=$generoValues[$genero]?><br />
+      <b>Data de realização:</b> <?=converteData($node->field_data_do_exame['und'][0]['value'])?><br /><br />
+      <p>
+        <?=$node->body['und'][0]['value']?>
+      </p>
+    </div>
     <div class="assinatura">
       <?=$autor->field_assinatura['und'][0]['value']?>
     </div>

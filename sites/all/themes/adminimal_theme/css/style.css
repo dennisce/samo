@@ -3681,10 +3681,15 @@ span.even{
 }
 
 /* Laudos */
+.laudo .conteudo{
+  font-size: 20px;
+  line-height: initial;
+}
 .print-logo{
   box-shadow: none!important;
 }
 .laudo .title{
+  font-size: 30px;
   text-align: center;
   color: #295f39;
   font-weight: bold!important;
