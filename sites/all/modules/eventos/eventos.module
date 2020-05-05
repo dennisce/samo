@@ -105,6 +105,11 @@ function eventos_menu() {
     'access arguments' => array('access content')
   );
 
+  $items['admin/dicom/numFiles'] = array(
+    'delivery callback' => 'getNumFiles',
+    'access arguments' => array('access content')
+  );
+
   return $items;
   
 }
@@ -965,4 +970,25 @@ function debugFake($p){
     print_r($p);
   echo "<pre>";
   die();
+}
+
+function getNumFiles(){
+  // Diretório onde as imagens DICOM estarão
+  $dir = "dicom_converter/DICOM/";
+  $files = array();
+  $jpg = array();
+  if ($handle = opendir($dir)) {
+            while (false !== ($file = readdir($handle))){
+          if ($file != "." && $file != ".."){
+            $t = explode(".",$file);
+            $files[] = $file;
+            if($t[1]== 'jpg') {
+              $jpg[] = $file;
+            }            
+      }
+    }
+      closedir($handle);
+  }
+  echo intval((count($jpg)/count($files))*100)."%";
+
 }

@@ -52,10 +52,11 @@
 
   }
 
-  // Recupera os valores dos fields para os inputs
+// Recupera os valores dos fields para os inputs
 $all_fields_on_my_website = field_info_fields();
 $generoValues = list_allowed_values($all_fields_on_my_website["field_genero"]);
 $genero = (isset($paciente->field_genero['und']))? $paciente->field_genero['und'][0]['value'] : 0;
+
 ?>
 <script type="text/javascript">
 var j = jQuery.noConflict();

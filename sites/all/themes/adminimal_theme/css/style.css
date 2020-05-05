@@ -3680,3 +3680,18 @@ span.even{
   float: left;
 }
 
+/* Laudos */
+.laudo .title{
+  text-align: center;
+  color: #295f39;
+}
+.laudo .assinatura{
+  text-align: center;
+  float: right;
+}
+.laudo .imagens{
+  text-align: center;
+}
+.laudo .imagens img{
+  margin: 3px;
+}

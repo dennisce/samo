@@ -1,3 +1,0 @@
-name = Módulo de conversão de arquivos DICOM
-description = Módulo responsável pela conversão de arquivos DICOM em JPG e importação para exames
-core = 7.x

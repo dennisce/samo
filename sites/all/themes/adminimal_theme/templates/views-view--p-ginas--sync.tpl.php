@@ -4,14 +4,21 @@ var j = jQuery;
 function toDo(url){
 	j("#alvo").html(" ");
 	j("#alvo").html("Carregando...");
+	var i = 0;
+	var qtd = setInterval(() => {
+		j.get("/admin/dicom/numFiles", function(data, status){
+			j("#alvo").html(data);
+		});
+	}, 2000);
 	j.get(url, function(data, status){
+		clearInterval(qtd);
     	j("#alvo").html(data + "<br /> Status: " + status);
   	});
 }
 
 </script>
 <ul>
-	<li><a class="button bto" href="#" id="bto" onClick="toDo('/sites/all/modules/dicom_convert/convert.php')"> Converter DICOM ! </a> <br /><br /></li>
+	<li><a class="button bto" href="#" id="bto" onClick="toDo('/dicom_converter/convert.php')"> Converter DICOM ! </a> <br /><br /></li>
 	<li><a class="button bto" href="/admin/sync?op=update" id="bto"> Importar imagens ! </a></li>
 </ul>
 <div id="alvo"></div>
@@ -22,7 +29,7 @@ error_reporting(E_ALL | E_STRICT);
 
 
 //Onde as imagens estão
-$filepath = drupal_realpath('sites/default/files/DICOM');
+$filepath = drupal_realpath('dicom_converter/DICOM');
 if(isset($_GET['op']) && $_GET['op'] == "update"){
 
 
