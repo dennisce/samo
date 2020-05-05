@@ -9,3 +9,7 @@ sites/*/private
 # Ignore al this files
 .DS_Store
 .gitignore
+
+#Ignore DICOM images
+dicon_converter/DICOM/*
+dicon_converter/DICOM
