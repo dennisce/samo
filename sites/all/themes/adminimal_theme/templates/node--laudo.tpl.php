@@ -87,7 +87,8 @@ $all_fields_on_my_website = field_info_fields();
 $generoValues = list_allowed_values($all_fields_on_my_website["field_genero"]);
 $genero = (isset($node->field_paciente['und'][0]['entity']->field_genero['und']))? $node->field_paciente['und'][0]['entity']->field_genero['und'][0]['value'] : 0;
 
-$autor = user_load((isset($node->revision_uid))? $node->revision_uid:$node->uid);
+// Para assinar o laudo, basta atualizar o conteúdo pelo próprio usuário que irá assinar
+$responsavel = user_load((isset($node->revision_uid))? $node->revision_uid:$node->uid);
 
 ?>
 <div id="node-<?php print $node->nid; ?>" class="<?php print $classes; ?> clearfix"<?php print $attributes; ?>>
@@ -106,7 +107,14 @@ $autor = user_load((isset($node->revision_uid))? $node->revision_uid:$node->uid)
       </p>
     </div>
     <div class="assinatura">
-      <?=$autor->field_assinatura['und'][0]['value']?>
+      <?php 
+      if(isset($responsavel->field_assinatura)){
+          echo $responsavel->field_assinatura['und'][0]['value'];
+      } else {
+          echo "<h3 class='debito'>ATENÇÃO, LAUDO SEM ASSINATURA!</h3>";
+      }
+
+      ?>
     </div>
     <div style="clear:both; page-break-before: always;"> </div>
     <div class="imagens">
