@@ -111,22 +111,25 @@ $responsavel = user_load((isset($node->revision_uid))? $node->revision_uid:$node
       if(isset($responsavel->field_assinatura['und'])){
           echo $responsavel->field_assinatura['und'][0]['value'];
       } else {
-          echo "<h3 class='debito'><b>ATENÇÃO, LAUDO SEM ASSINATURA!</b></h3>";
+          echo "<h3 class='debito'><b>ATENÇÃO, LAUDO SEM ASSINATURA!</b></h3><br />";
       }
 
       ?>
     </div>
-    <div style="clear:both; page-break-before: always;"> </div>
-    <div class="imagens">
-      <?php
-        if(isset($node->field_imagens)){
-          foreach($node->field_imagens['und'] as $k=>$v){
-            echo "<img src='".file_create_url($v['uri'])."' width='430px' />";
-          }
+    <?php
+      if(isset($node->field_imagens['und'])){
+        echo '<div style="clear:both; page-break-before: always;"> </div>';
+          echo '<div class="imagens">';
+        foreach($node->field_imagens['und'] as $k=>$v){
+          echo "<img src='".file_create_url($v['uri'])."' width='430px' />";
         }
-      ?>
-    </div>
-  </div>
+          echo '</div>';
+        echo '</div>';
+      } else {
+        echo "<h3 class='debito'><b>ATENÇÃO, LAUDO SEM IMAGENS!</b></h3>";
+      }
+    ?>
+    
 
   <?php print render($content['links']); ?>
 
