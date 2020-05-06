@@ -132,6 +132,7 @@ j(document).ready(function (){
 	<li id="tituloMenu"><h7>Paciente</h7></li>
     <li><img src="<?=$base_url."/".path_to_theme()?>/icons/edita.png" /><a id="edita" tabindex="-1" href="#">Editar dados </a></li>
     <li><img src="<?=$base_url."/".path_to_theme()?>/icons/pront.png" /><a id="pront" tabindex="-1" href="#">Prontuário </a></li>
+    <li><img src="<?=$base_url."/".path_to_theme()?>/icons/laudo.png" /><a id="laudo" tabindex="-1" href="#">Laudos </a></li>
 	<li><img src="<?=$base_url."/".path_to_theme()?>/icons/resum.png" /><a id="resum" tabindex="-1" href="#">Resumo financeiro </a></li>
 	<li><img src="<?=$base_url."/".path_to_theme()?>/icons/orcam.png" /><a id="orcam" tabindex="-1" href="#">Orçamentos </a></li>
 	<li><img src="<?=$base_url."/".path_to_theme()?>/icons/whats.png" /><a id="whats" tabindex="-1" href="#">WhatsApp </a></li>

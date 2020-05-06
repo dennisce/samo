@@ -33,6 +33,9 @@ j(document).ready(function(){
         case 'pront':
           selectedMenu.href = Drupal.settings.basePath+"admin/prontuario/"+uid[1]+"/ALL";
           break;
+        case 'laudo':
+          selectedMenu.href = Drupal.settings.basePath+"admin/laudos/"+uid[1];
+          break;
         case 'resum':
           selectedMenu.href = Drupal.settings.basePath+"resumo-financeiro/"+uid[1];
           break;
