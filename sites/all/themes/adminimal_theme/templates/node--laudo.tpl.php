@@ -108,10 +108,10 @@ $responsavel = user_load((isset($node->revision_uid))? $node->revision_uid:$node
     </div>
     <div class="assinatura">
       <?php 
-      if(isset($responsavel->field_assinatura)){
+      if(isset($responsavel->field_assinatura['und'])){
           echo $responsavel->field_assinatura['und'][0]['value'];
       } else {
-          echo "<h3 class='debito'>ATENÇÃO, LAUDO SEM ASSINATURA!</h3>";
+          echo "<h3 class='debito'><b>ATENÇÃO, LAUDO SEM ASSINATURA!</b></h3>";
       }
 
       ?>
