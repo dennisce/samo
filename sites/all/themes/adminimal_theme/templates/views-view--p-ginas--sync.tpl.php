@@ -48,7 +48,7 @@ if ($handle = opendir($filepath)) {
 $lista = scandir($filepath,1);
 $list = array_pop($lista);
 $list = array_pop($lista);
-
+global $user;
 
 foreach($lista as $f){
 
@@ -66,7 +66,7 @@ foreach($lista as $f){
 		if($n){
 			$file = (object) array(
 
-				'uid' => 1,
+				'uid' => $user->uid,
 
 				'uri' => $filepath."/".$f,
 
