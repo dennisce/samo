@@ -203,11 +203,11 @@ function listaProcedimentos(){
 function manipulaAgendamento(){
   
   // Valida a api_key
-  // api_key();
+  api_key();
 
-  echo "<pre>";
-  print_r(node_load(422));
-  die();
+  // echo "<pre>";
+  // print_r(node_load(422));
+  // die();
 
   if(isset($_POST['UID'])){
     $user = user_load($_POST['UID']);
