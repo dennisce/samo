@@ -1669,7 +1669,6 @@ function hook_page_alter(&$page) {
  * @see forms_api_reference.html
  */
 function hook_form_alter(&$form, &$form_state, $form_id) {
-  
   if (isset($form['type']) && $form['type']['#value'] . '_node_settings' == $form_id) {
     $form['workflow']['upload_' . $form['type']['#value']] = array(
       '#type' => 'radios',

@@ -1,6 +1,6 @@
 <?php
 
-define("API_KEY","jTauG01zBT_BLiZCaJ9JEg");
+define("API_KEY","jTauG01zBT_BLiZCaJ9JEg_ALTERADA");
 function api_key(){
   $h = getallheaders();
   $api_key = '';
@@ -203,7 +203,12 @@ function listaProcedimentos(){
 function manipulaAgendamento(){
   
   // Valida a api_key
-  api_key();
+  // api_key();
+
+  echo "<pre>";
+  print_r(node_load(422));
+  die();
+
   if(isset($_POST['UID'])){
     $user = user_load($_POST['UID']);
   } else {
@@ -293,8 +298,8 @@ function manipulaAgendamento(){
   }
   // print_r($agendamento); die();
   // Atualiza todo o agendamento
-  $n = node_submit($agendamento);
-  $salvo = node_save($n);
+  // $n = node_submit($agendamento);
+  $salvo = node_save($agendamento);
   echo $agendamento->nid;
   
 }
